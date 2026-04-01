@@ -24,7 +24,7 @@
     --green: #4caf78;
     --red: #e05252;
     --mono: 'IBM Plex Mono', monospace;
-  }}
+  }
 
   html, body {
     background: var(--bg);
@@ -73,6 +73,37 @@
     overflow-y: auto;
   }
   .sidebar::-webkit-scrollbar { width: 4px; }
+
+  @media (max-width: 640px) {
+    html, body { height: auto; overflow: auto; }
+
+    .app {
+      grid-template-columns: 1fr;
+      grid-template-rows: auto 1fr;
+      height: auto;
+      min-height: calc(100vh - 57px);
+    }
+
+    .sidebar {
+      border-right: none;
+      border-bottom: 1px solid var(--border);
+      overflow-y: visible;
+    }
+
+    .canvas-area {
+      min-height: 60vw;
+      padding: 16px;
+    }
+
+    #b {
+      width: 100%;
+      height: auto;
+    }
+
+    .drop-overlay {
+      inset: 12px;
+    }
+  }
   .sidebar::-webkit-scrollbar-track { background: transparent; }
   .sidebar::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
 
