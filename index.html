@@ -268,6 +268,41 @@
     margin-right: 6px;
     flex-shrink: 0;
   }
+
+  /* Angle dial */
+  .angle-dial-wrap {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 10px 0 8px;
+  }
+  #angleDial {
+    border-radius: 50%;
+    flex-shrink: 0;
+    display: block;
+  }
+  .angle-dial-labels {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  #angleHint {
+    font-size: 11px;
+    color: var(--text-dim);
+  }
+
+  /* Scroll wheel */
+  .angle-wheel-container {
+    margin: 6px 0 4px;
+    border-radius: 3px;
+    overflow: hidden;
+    cursor: ew-resize;
+    user-select: none;
+    border: 1px solid var(--border);
+  }
+  .angle-wheel-container:active { cursor: grabbing; }
+  #angleWheel { display: block; width: 100%; }
+  #angleDial { cursor: crosshair; }
 </style>
 </head>
 <body>
@@ -292,15 +327,28 @@
     <div class="settings-group">
       <div class="settings-group-title">Sort</div>
 
-      <div class="toggle-row">
-        <span class="toggle-label">Vertical</span>
-        <label class="toggle">
-          <input type="checkbox" id="vertical" checked>
-          <span class="toggle-track"></span>
-        </label>
+      <div class="field">
+        <div class="field-label">
+          <span>Angle</span>
+          <div class="field-value-wrap">
+            <input class="field-value" id="angleVal" type="number" min="0" max="359" value="90" title="Click to type">
+            <span style="font-size:10px;color:var(--text-dimmer);margin-left:2px;">°</span>
+          </div>
+        </div>
+        <div class="angle-dial-wrap">
+          <canvas id="angleDial" width="72" height="72"></canvas>
+          <div class="angle-dial-labels">
+            <span id="angleHint">Vertical sort</span>
+          </div>
+        </div>
+        <div class="angle-wheel-container" id="angleWheelContainer">
+          <canvas id="angleWheel" height="36"></canvas>
+        </div>
+        <div class="size-note" id="angleNote">0° = horizontal · 90° = vertical · drag wheel or click dial</div>
+        <div class="size-note" style="color:var(--text-dimmer);margin-top:2px;" id="anglePerfNote"></div>
       </div>
 
-      <div class="toggle-row">
+      <div class="toggle-row" style="margin-top:12px;">
         <span class="toggle-label">Invert</span>
         <label class="toggle">
           <input type="checkbox" id="invert">
@@ -363,7 +411,9 @@ const statusDot  = document.getElementById('statusDot');
 const statusText = document.getElementById('statusText');
 const thresholdEl= document.getElementById('threshold');
 const thresholdVal=document.getElementById('thresholdVal');
-const verticalEl = document.getElementById('vertical');
+const angleVal   = document.getElementById('angleVal');
+const wheelCanvas = document.getElementById('angleWheel');
+const wheelContainer = document.getElementById('angleWheelContainer');
 const invertEl   = document.getElementById('invert');
 
 let loadedImg = null;
@@ -385,6 +435,223 @@ thresholdVal.addEventListener('change', () => {
   thresholdVal.value = v; thresholdEl.value = v;
 });
 thresholdVal.addEventListener('keydown', e => { if (e.key === 'Enter') thresholdVal.blur(); });
+
+// ── Angle dial + scroll wheel ─────────────────────────────────────────────────
+const dialCanvas    = document.getElementById('angleDial');
+const dialCtx       = dialCanvas.getContext('2d');
+const wCtx          = wheelCanvas.getContext('2d');
+const angleHint     = document.getElementById('angleHint');
+const anglePerfNote = document.getElementById('anglePerfNote');
+
+let currentAngle = 90;
+const PPD = 2; // pixels per degree for the scroll wheel
+
+function setAngle(deg) {
+  currentAngle = ((deg % 360) + 360) % 360;
+  angleVal.value = Math.round(currentAngle);
+  drawDial(currentAngle);
+  drawWheel(currentAngle);
+  updateHints(currentAngle);
+}
+
+function updateHints(deg) {
+  const n = ((Math.round(deg) % 360) + 360) % 360;
+  const isAxis = n % 90 === 0;
+  if (n === 0 || n === 180)       angleHint.textContent = 'Horizontal sort';
+  else if (n === 90 || n === 270) angleHint.textContent = 'Vertical sort';
+  else if (n % 45 === 0)          angleHint.textContent = `Diagonal sort (${n}°)`;
+  else                            angleHint.textContent = `${n}° sort`;
+
+  if (isAxis) {
+    anglePerfNote.textContent = '⚡ Fast — axis-aligned sort';
+    anglePerfNote.style.color = 'var(--green)';
+  } else {
+    anglePerfNote.textContent = '⏳ Slower — requires rotated canvas pass';
+    anglePerfNote.style.color = 'var(--text-dimmer)';
+  }
+}
+
+// ── Draw dial ─────────────────────────────────────────────────────────────────
+function drawDial(deg) {
+  const W = dialCanvas.width, H = dialCanvas.height;
+  const cx = W / 2, cy = H / 2, r = cx - 4;
+  const rad = deg * Math.PI / 180;
+  dialCtx.clearRect(0, 0, W, H);
+
+  // BG circle
+  dialCtx.beginPath();
+  dialCtx.arc(cx, cy, r, 0, Math.PI * 2);
+  dialCtx.fillStyle = '#1c1e21';
+  dialCtx.fill();
+  dialCtx.strokeStyle = '#2a2d31';
+  dialCtx.lineWidth = 1;
+  dialCtx.stroke();
+
+  // Tick marks
+  [0,45,90,135,180,225,270,315].forEach(t => {
+    const tr = t * Math.PI / 180;
+    const isCard = t % 90 === 0;
+    dialCtx.beginPath();
+    dialCtx.moveTo(cx + Math.cos(tr)*(r-(isCard?7:4)), cy + Math.sin(tr)*(r-(isCard?7:4)));
+    dialCtx.lineTo(cx + Math.cos(tr)*(r-1),            cy + Math.sin(tr)*(r-1));
+    dialCtx.strokeStyle = isCard ? '#383c42' : '#2a2d31';
+    dialCtx.lineWidth   = isCard ? 1.5 : 1;
+    dialCtx.stroke();
+  });
+
+  // Cross-hair
+  dialCtx.beginPath();
+  dialCtx.moveTo(cx-r+6, cy); dialCtx.lineTo(cx+r-6, cy);
+  dialCtx.moveTo(cx, cy-r+6); dialCtx.lineTo(cx, cy+r-6);
+  dialCtx.strokeStyle = '#242628'; dialCtx.lineWidth = 1;
+  dialCtx.stroke();
+
+  // Direction line
+  const lx = Math.cos(rad)*(r-6), ly = Math.sin(rad)*(r-6);
+  dialCtx.beginPath();
+  dialCtx.moveTo(cx-lx, cy-ly); dialCtx.lineTo(cx+lx, cy+ly);
+  dialCtx.strokeStyle = '#a855f7'; dialCtx.lineWidth = 2;
+  dialCtx.lineCap = 'round'; dialCtx.stroke();
+
+  // Arrow head
+  const ax = cx+lx, ay = cy+ly, al = 6, aa = 0.45;
+  dialCtx.beginPath();
+  dialCtx.moveTo(ax, ay);
+  dialCtx.lineTo(ax - al*Math.cos(rad-aa), ay - al*Math.sin(rad-aa));
+  dialCtx.moveTo(ax, ay);
+  dialCtx.lineTo(ax - al*Math.cos(rad+aa), ay - al*Math.sin(rad+aa));
+  dialCtx.strokeStyle = '#a855f7'; dialCtx.lineWidth = 1.5;
+  dialCtx.stroke();
+
+  // Center dot
+  dialCtx.beginPath();
+  dialCtx.arc(cx, cy, 2.5, 0, Math.PI*2);
+  dialCtx.fillStyle = '#a855f7'; dialCtx.fill();
+}
+
+// ── Draw scroll wheel ─────────────────────────────────────────────────────────
+function drawWheel(deg) {
+  const W = wheelCanvas.width, H = wheelCanvas.height;
+  wCtx.clearRect(0, 0, W, H);
+  wCtx.fillStyle = '#1c1e21';
+  wCtx.fillRect(0, 0, W, H);
+
+  const cx = W / 2;
+  const degsVisible = W / 2 / PPD + 2;
+
+  for (let d = Math.floor(deg - degsVisible); d <= Math.ceil(deg + degsVisible); d++) {
+    const n = ((d % 360) + 360) % 360;
+    const x = cx + (d - deg) * PPD;
+    let tickH, strokeStyle, lw;
+    if      (n % 90 === 0) { tickH = H * 0.72; strokeStyle = '#555a63'; lw = 1.5; }
+    else if (n % 45 === 0) { tickH = H * 0.50; strokeStyle = '#383c42'; lw = 1; }
+    else if (n % 15 === 0) { tickH = H * 0.32; strokeStyle = '#2a2d31'; lw = 1; }
+    else if (n % 5  === 0) { tickH = H * 0.18; strokeStyle = '#242628'; lw = 1; }
+    else continue;
+
+    wCtx.beginPath();
+    wCtx.moveTo(x, H/2 - tickH/2);
+    wCtx.lineTo(x, H/2 + tickH/2);
+    wCtx.strokeStyle = strokeStyle;
+    wCtx.lineWidth = lw;
+    wCtx.stroke();
+
+    // Cardinal labels
+    if (n % 90 === 0) {
+      wCtx.fillStyle = '#555a63';
+      wCtx.font = '8px IBM Plex Mono, monospace';
+      wCtx.textAlign = 'center';
+      wCtx.fillText(n + '°', x, H - 3);
+    }
+  }
+
+  // Center indicator line (accent)
+  wCtx.beginPath();
+  wCtx.moveTo(cx, 0); wCtx.lineTo(cx, H);
+  wCtx.strokeStyle = '#a855f7'; wCtx.lineWidth = 1.5;
+  wCtx.stroke();
+
+  // Fade edges
+  const grad = wCtx.createLinearGradient(0, 0, W, 0);
+  grad.addColorStop(0,    '#1c1e21');
+  grad.addColorStop(0.12, 'rgba(28,30,33,0)');
+  grad.addColorStop(0.88, 'rgba(28,30,33,0)');
+  grad.addColorStop(1,    '#1c1e21');
+  wCtx.fillStyle = grad;
+  wCtx.fillRect(0, 0, W, H);
+}
+
+// Resize wheel canvas to match container width
+function resizeWheel() {
+  wheelCanvas.width = wheelContainer.offsetWidth;
+  drawWheel(currentAngle);
+}
+window.addEventListener('resize', resizeWheel);
+
+// ── Dial interaction (click + drag to set angle) ───────────────────────────────
+let dialDragging = false;
+
+function angleFromDialEvent(e) {
+  const rect = dialCanvas.getBoundingClientRect();
+  const x = (e.clientX - rect.left) - rect.width  / 2;
+  const y = (e.clientY - rect.top)  - rect.height / 2;
+  return ((Math.atan2(y, x) * 180 / Math.PI) + 360) % 360;
+}
+
+dialCanvas.addEventListener('mousedown', e => {
+  dialDragging = true;
+  setAngle(angleFromDialEvent(e));
+  e.preventDefault();
+});
+dialCanvas.addEventListener('touchstart', e => {
+  dialDragging = true;
+  setAngle(angleFromDialEvent(e.touches[0]));
+  e.preventDefault();
+}, { passive: false });
+
+// ── Wheel interaction (drag horizontally) ─────────────────────────────────────
+let wheelDragging = false;
+let wheelStartX   = 0;
+let wheelStartAngle = 0;
+
+wheelCanvas.addEventListener('mousedown', e => {
+  wheelDragging   = true;
+  wheelStartX     = e.clientX;
+  wheelStartAngle = currentAngle;
+  e.preventDefault();
+});
+wheelCanvas.addEventListener('touchstart', e => {
+  wheelDragging   = true;
+  wheelStartX     = e.touches[0].clientX;
+  wheelStartAngle = currentAngle;
+  e.preventDefault();
+}, { passive: false });
+
+// ── Global move / up ──────────────────────────────────────────────────────────
+window.addEventListener('mousemove', e => {
+  if (dialDragging)  setAngle(angleFromDialEvent(e));
+  if (wheelDragging) setAngle(wheelStartAngle + (e.clientX - wheelStartX) / PPD);
+});
+window.addEventListener('touchmove', e => {
+  if (dialDragging)  setAngle(angleFromDialEvent(e.touches[0]));
+  if (wheelDragging) setAngle(wheelStartAngle + (e.touches[0].clientX - wheelStartX) / PPD);
+}, { passive: false });
+window.addEventListener('mouseup',  () => { dialDragging = false; wheelDragging = false; });
+window.addEventListener('touchend', () => { dialDragging = false; wheelDragging = false; });
+
+// ── Typed input sync ──────────────────────────────────────────────────────────
+angleVal.addEventListener('input', () => {
+  const v = parseInt(angleVal.value);
+  if (!isNaN(v)) setAngle(v);
+});
+angleVal.addEventListener('change', () => {
+  const v = parseInt(angleVal.value) || 0;
+  setAngle(v);
+});
+angleVal.addEventListener('keydown', e => { if (e.key === 'Enter') angleVal.blur(); });
+
+// Initial render (after DOM paint so container has width)
+requestAnimationFrame(() => { resizeWheel(); setAngle(90); });
 
 // ── File handling ─────────────────────────────────────────────────────────────
 browseBtn.addEventListener('click', () => fileInput.click());
@@ -442,7 +709,7 @@ resetBtn.addEventListener('click', () => {
 // ── Download ──────────────────────────────────────────────────────────────────
 downloadBtn.addEventListener('click', () => {
   const link = document.createElement('a');
-  link.download = `sorted_t${thresholdEl.value}.png`;
+  link.download = `sorted_${Math.round(currentAngle)}deg_t${thresholdEl.value}.png`;
   link.href = canvas.toDataURL('image/png');
   link.click();
 });
@@ -454,7 +721,7 @@ function sort() {
   if (!loadedImg) return;
   ctx.drawImage(loadedImg, 0, 0);
   const threshold = parseInt(thresholdEl.value);
-  const vertical  = verticalEl.checked;
+  const angle     = Math.round(currentAngle);
   const invert    = invertEl.checked;
 
   setStatus('working', 'Sorting…');
@@ -463,11 +730,10 @@ function sort() {
 
   // Yield to let UI update before the sync loop
   setTimeout(() => {
-    if (vertical) pixelSortV(threshold, invert);
-    else          pixelSortH(threshold, invert);
+    pixelSortAngle(threshold, invert, angle);
 
     const w = canvas.width, h = canvas.height;
-    setStatus('ready', `${w}×${h} — sorted (t=${threshold})`);
+    setStatus('ready', `${w}×${h} — sorted (${angle}°, t=${threshold})`);
     processBtn.disabled = false;
     processBtn.innerHTML = '▶ Sort';
   }, 20);
@@ -535,6 +801,52 @@ function pixelSortV(threshold, invert) {
     setPixels(id.data, pixels);
     ctx.putImageData(id, col, 0);
   }
+}
+
+function pixelSortAngle(threshold, invert, angleDeg) {
+  // Fast paths for axis-aligned angles
+  const deg = ((angleDeg % 360) + 360) % 360;
+  if (deg === 0 || deg === 180) return pixelSortH(threshold, invert);
+  if (deg === 90 || deg === 270) return pixelSortV(threshold, invert);
+
+  const W   = canvas.width;
+  const H   = canvas.height;
+  const rad = deg * Math.PI / 180;
+  const absCos = Math.abs(Math.cos(rad));
+  const absSin = Math.abs(Math.sin(rad));
+
+  // Temp canvas large enough to hold the image at any rotation
+  const rotW = Math.ceil(W * absCos + H * absSin);
+  const rotH = Math.ceil(W * absSin + H * absCos);
+
+  // Step 1: draw current canvas (original image) rotated by -angle onto temp
+  const tmpCvs = document.createElement('canvas');
+  tmpCvs.width  = rotW;
+  tmpCvs.height = rotH;
+  const tmpCtx  = tmpCvs.getContext('2d');
+  tmpCtx.save();
+  tmpCtx.translate(rotW / 2, rotH / 2);
+  tmpCtx.rotate(-rad);
+  tmpCtx.drawImage(canvas, -W / 2, -H / 2);
+  tmpCtx.restore();
+
+  // Step 2: sort every row of the rotated image
+  for (let row = 0; row < rotH; row++) {
+    const id     = tmpCtx.getImageData(0, row, rotW, 1);
+    const pixels = getPixels(id.data);
+    sortSegments(pixels, threshold, invert);
+    setPixels(id.data, pixels);
+    tmpCtx.putImageData(id, 0, row);
+  }
+
+  // Step 3: rotate sorted image back by +angle onto main canvas
+  // clearRect first so corner areas outside the original bounds are transparent
+  ctx.clearRect(0, 0, W, H);
+  ctx.save();
+  ctx.translate(W / 2, H / 2);
+  ctx.rotate(rad);
+  ctx.drawImage(tmpCvs, -rotW / 2, -rotH / 2);
+  ctx.restore();
 }
 </script>
 </body>
