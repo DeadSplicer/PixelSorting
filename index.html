@@ -37,80 +37,113 @@
     line-height: 1.5;
   }
 
+  /* ── HEADER ── */
   header {
     border-bottom: 1px solid var(--border);
-    padding: 18px 32px;
+    padding: 0 20px;
+    height: 57px;
     display: flex;
-    align-items: baseline;
+    align-items: center;
     gap: 16px;
     background: var(--surface);
     flex-shrink: 0;
+    position: relative;
+    z-index: 50;
   }
-  .logo { font-size: 18px; font-weight: 600; letter-spacing: -0.5px; color: #fff; }
-  .logo span { color: var(--accent); }
-  .logo-sub { font-size: 11px; color: var(--text-dim); letter-spacing: 0.05em; font-weight: 300; }
-  .header-link {
+  #logoImg {
+    height: 50px;
+    width: auto;
+    object-fit: contain;
+    display: block;
+    position: absolute;
+    left: 150px; /* center of 300px sidebar */
+    transform: translateX(-50%);
+  }
+  .header-right {
     margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .header-link {
     font-size: 12px;
     color: var(--text-dim);
     text-decoration: none;
     letter-spacing: 0.04em;
     transition: color 0.15s;
+    margin-right: 8px;
   }
   .header-link:hover { color: var(--text); }
+  .icon-btn {
+    width: 32px; height: 32px;
+    display: flex; align-items: center; justify-content: center;
+    background: none; border: none;
+    color: var(--text-dim); border-radius: 6px;
+    cursor: pointer; transition: color 0.15s, background 0.15s;
+  }
+  .icon-btn:hover { color: var(--text); background: var(--surface2); }
+  .icon-btn svg { width: 18px; height: 18px; }
 
+  /* ── THREE-DOT MENU ── */
+  #threeMenu {
+    position: fixed;
+    top: 57px; right: 16px;
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: 10px;
+    overflow: hidden;
+    z-index: 400;
+    min-width: 210px;
+    transform: scale(0.92) translateY(-6px);
+    transform-origin: top right;
+    opacity: 0; pointer-events: none;
+    transition: transform 0.15s, opacity 0.15s;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+  }
+  #threeMenu.open { transform: scale(1) translateY(0); opacity: 1; pointer-events: all; }
+  .menu-item {
+    width: 100%; display: flex; align-items: center; gap: 12px;
+    padding: 12px 16px; background: none; border: none;
+    border-bottom: 1px solid var(--border);
+    color: var(--text); font-family: var(--mono); font-size: 13px;
+    text-align: left; cursor: pointer; transition: background 0.1s;
+  }
+  .menu-item:last-child { border-bottom: none; }
+  .menu-item:hover { background: var(--surface3); }
+  .menu-item svg { width: 16px; height: 16px; color: var(--text-dim); flex-shrink: 0; }
+
+  /* ── LAYOUT ── */
   .app {
     display: grid;
     grid-template-columns: 300px 1fr;
     height: calc(100vh - 57px);
   }
 
-  /* SIDEBAR */
+  /* ── SIDEBAR ── */
   .sidebar {
     background: var(--surface);
     border-right: 1px solid var(--border);
     display: flex;
     flex-direction: column;
+    overflow: hidden; /* children manage scroll */
+  }
+  .sidebar-scroll {
+    flex: 1;
     overflow-y: auto;
+    min-height: 0;
   }
-  .sidebar::-webkit-scrollbar { width: 4px; }
-
-  @media (max-width: 640px) {
-    html, body { height: auto; overflow: auto; }
-
-    .app {
-      grid-template-columns: 1fr;
-      grid-template-rows: auto 1fr;
-      height: auto;
-      min-height: calc(100vh - 57px);
-    }
-
-    .sidebar {
-      border-right: none;
-      border-bottom: 1px solid var(--border);
-      overflow-y: visible;
-    }
-
-    .canvas-area {
-      min-height: 60vw;
-      padding: 16px;
-    }
-
-    #b {
-      width: 100%;
-      height: auto;
-    }
-
-    .drop-overlay {
-      inset: 12px;
-    }
+  .sidebar-scroll::-webkit-scrollbar { width: 4px; }
+  .sidebar-scroll::-webkit-scrollbar-track { background: transparent; }
+  .sidebar-scroll::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+  .sidebar-bottom {
+    flex-shrink: 0;
+    border-top: 1px solid var(--border);
   }
-  .sidebar::-webkit-scrollbar-track { background: transparent; }
-  .sidebar::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+  .sidebar-bottom .settings-group { border-bottom: none; }
 
-  .settings-group { padding: 18px 20px; border-bottom: 1px solid var(--border); }
+  .settings-group { padding: 16px 20px; border-bottom: 1px solid var(--border); }
   .settings-group-title {
-    font-size: 9px; font-weight: 600; letter-spacing: 0.18em;
+    font-size: 12px; font-weight: 600; letter-spacing: 0.18em;
     text-transform: uppercase; color: var(--text-dimmer); margin-bottom: 14px;
   }
 
@@ -121,11 +154,10 @@
     display: flex; align-items: center; justify-content: space-between;
   }
 
-  /* Editable value badge */
   .field-value-wrap { display: flex; align-items: center; gap: 2px; }
   .field-value {
     color: var(--accent); font-weight: 500; font-size: 11px;
-    font-family: var(--mono); background: rgba(232,197,71,0.08);
+    font-family: var(--mono); background: rgba(168,85,247,0.08);
     border: 1px solid transparent; border-radius: 2px;
     padding: 1px 5px; cursor: text;
     transition: border-color 0.12s, background 0.12s;
@@ -152,8 +184,8 @@
     background: var(--accent); border: none; cursor: pointer;
   }
 
-  /* TOGGLE */
-  .toggle-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  /* ── TOGGLE ── */
+  .toggle-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
   .toggle-row:last-child { margin-bottom: 0; }
   .toggle-label { font-size: 11px; color: var(--text-dim); }
   .toggle { position: relative; width: 34px; height: 18px; flex-shrink: 0; }
@@ -171,7 +203,7 @@
   }
   .toggle input:checked + .toggle-track::after { transform: translateX(16px); }
 
-  /* Buttons */
+  /* ── BUTTONS ── */
   .process-btn {
     width: 100%; background: var(--accent); color: #111; border: none;
     font-family: var(--mono); font-size: 13px; font-weight: 600;
@@ -195,7 +227,37 @@
 
   .size-note { font-size: 10px; color: var(--text-dimmer); margin-top: 3px; }
 
-  /* Status */
+  /* ── MASK TOOL BUTTONS ── */
+  .mask-tool-row { display: flex; gap: 6px; margin-bottom: 8px; }
+  .tool-btn {
+    flex: 1; padding: 7px 4px;
+    background: var(--surface3); border: 1px solid var(--border2);
+    border-radius: 6px; color: var(--text-dim);
+    font-family: var(--mono); font-size: 10px; font-weight: 500;
+    cursor: pointer; transition: background 0.15s, color 0.15s, border-color 0.15s;
+    display: flex; align-items: center; justify-content: center; gap: 4px;
+  }
+  .tool-btn:hover { border-color: var(--border2); color: var(--text); background: var(--surface2); }
+  .tool-btn.active { background: rgba(168,85,247,0.18); border-color: var(--accent); color: var(--accent); }
+  .tool-btn svg { width: 13px; height: 13px; flex-shrink: 0; }
+  .tool-btn-danger { }
+  .tool-btn-danger:hover { background: rgba(224,82,82,0.1); border-color: rgba(224,82,82,0.5); color: var(--red); }
+  .tool-btn:disabled { opacity: 0.3; pointer-events: none; }
+
+  .undo-redo-row { display: flex; gap: 6px; margin-bottom: 10px; }
+  .undo-redo-row .tool-btn { flex: 1; }
+
+  .mask-section-divider { height: 1px; background: var(--border); margin: 10px 0; }
+
+  /* Instructions hint — styled like .size-note */
+  .mask-hint {
+    font-size: 10px;
+    color: var(--text-dimmer);
+    margin-top: 6px;
+    line-height: 1.6;
+  }
+
+  /* ── STATUS ── */
   .status-row {
     display: flex; align-items: center; gap: 8px;
     font-size: 11px; color: var(--text-dim);
@@ -208,7 +270,7 @@
   .status-dot.error { background: var(--red); }
   @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
 
-  /* CANVAS AREA */
+  /* ── CANVAS AREA ── */
   .canvas-area {
     display: flex;
     flex-direction: column;
@@ -219,7 +281,7 @@
     background: var(--bg);
   }
 
-  /* Drop zone overlay — shown when no image loaded */
+  /* Drop zone overlay */
   .drop-overlay {
     position: absolute;
     inset: 24px;
@@ -242,7 +304,19 @@
   .drop-title { font-size: 14px; font-weight: 500; color: var(--text); margin-bottom: 6px; }
   .drop-sub { font-size: 11px; color: var(--text-dim); }
 
-  /* Canvas */
+  /* Canvas wrap — zoom transform applied here */
+  #canvasWrap {
+    width: 100%; height: 100%;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    transform-origin: center center;
+    will-change: transform;
+    position: relative;
+  }
+  #canvasWrap.visible { display: flex; }
+
+  /* Main canvas */
   #b {
     max-width: 100%;
     max-height: 100%;
@@ -250,13 +324,47 @@
     image-rendering: pixelated;
   }
 
-  /* Drag over full canvas area */
+  /* Mask canvas — overlays #b exactly, sized via JS */
+  #maskCanvas {
+    position: absolute;
+    top: 0; left: 0;
+    pointer-events: none;
+    display: none;
+  }
+  #maskCanvas.visible { display: block; pointer-events: all; }
+
+  /* Brush size preview — visibility controlled by parent #brushSizeFloat */
+  #brushSizePreview {
+    display: block;
+    pointer-events: none;
+  }
+
+  /* Drag-over on full canvas area */
   .canvas-area.drag-over .drop-overlay {
     border-color: var(--accent);
     background: rgba(168,85,247,0.04);
   }
 
-  /* Spinner */
+  /* ── BRUSH CURSOR ── */
+  #brushCursor {
+    position: fixed;
+    border-radius: 50%;
+    border: 1.5px solid rgba(168,85,247,0.85);
+    box-shadow: 0 0 0 1.5px rgba(255,255,255,0.4);
+    pointer-events: none;
+    display: none;
+    transform: translate(-50%, -50%);
+    background: rgba(168,85,247,0.1);
+    z-index: 500;
+  }
+  #brushCursor.visible { display: block; }
+  #brushCursor.erase {
+    border-color: rgba(224,82,82,0.85);
+    background: rgba(224,82,82,0.1);
+    box-shadow: 0 0 0 1.5px rgba(255,255,255,0.4);
+  }
+
+  /* ── SPINNER ── */
   @keyframes spin { to { transform: rotate(360deg); } }
   .spinner {
     display: inline-block;
@@ -270,27 +378,16 @@
     flex-shrink: 0;
   }
 
-  /* Angle dial */
+  /* ── ANGLE DIAL ── */
   .angle-dial-wrap {
     display: flex;
     align-items: center;
     gap: 12px;
     margin: 10px 0 8px;
   }
-  #angleDial {
-    border-radius: 50%;
-    flex-shrink: 0;
-    display: block;
-  }
-  .angle-dial-labels {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-  }
-  #angleHint {
-    font-size: 11px;
-    color: var(--text-dim);
-  }
+  #angleDial { border-radius: 50%; flex-shrink: 0; display: block; cursor: crosshair; }
+  .angle-dial-labels { display: flex; flex-direction: column; gap: 2px; }
+  #angleHint { font-size: 11px; color: var(--text-dim); }
 
   /* Scroll wheel */
   .angle-wheel-container {
@@ -303,21 +400,149 @@
   }
   .angle-wheel-container:active { cursor: grabbing; }
   #angleWheel { display: block; width: 100%; }
-  #angleDial { cursor: crosshair; }
+
+  /* ── MODALS ── */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.65);
+    z-index: 600;
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.2s;
+  }
+  .modal-overlay.open { opacity: 1; pointer-events: all; }
+  .modal-card {
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: 12px;
+    padding: 28px;
+    width: 520px;
+    max-width: calc(100vw - 48px);
+    max-height: 80vh;
+    overflow-y: auto;
+    transform: scale(0.96) translateY(8px);
+    transition: transform 0.22s cubic-bezier(0.32, 0.72, 0, 1);
+    box-shadow: 0 24px 64px rgba(0,0,0,0.7);
+  }
+  .modal-card::-webkit-scrollbar { width: 4px; }
+  .modal-card::-webkit-scrollbar-track { background: transparent; }
+  .modal-card::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+  .modal-overlay.open .modal-card { transform: scale(1) translateY(0); }
+  .modal-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 20px; padding-bottom: 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  .modal-title { font-size: 14px; font-weight: 600; letter-spacing: 0.05em; }
+  .modal-close {
+    width: 28px; height: 28px; background: var(--surface3);
+    border: 1px solid var(--border); border-radius: 50%;
+    color: var(--text-dim); font-size: 14px;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: background 0.15s, color 0.15s;
+  }
+  .modal-close:hover { background: var(--border2); color: var(--text); }
+  .modal-body { font-size: 12.5px; color: var(--text-dim); line-height: 1.75; }
+  .modal-body h3 {
+    color: var(--text-dimmer); font-size: 10px; font-weight: 600;
+    letter-spacing: 0.14em; text-transform: uppercase;
+    margin: 18px 0 8px;
+  }
+  .modal-body p { margin-bottom: 10px; }
+  .modal-body a { color: var(--accent); text-decoration: none; }
+  .modal-body a:hover { text-decoration: underline; }
+  .modal-body ol, .modal-body ul { padding-left: 18px; }
+  .modal-body li { margin-bottom: 8px; }
+  .modal-body strong { color: var(--text); font-weight: 500; }
+
+  /* ── BRUSH SIZE FLOAT (beside sidebar, over canvas) ── */
+  #brushSizeFloat {
+    position: fixed;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 1s ease;
+    z-index: 9999;
+    overflow: visible;
+  }
+  #brushSizeFloat.visible { opacity: 1; transition: none; }
+
+  /* ── ZOOM/PAN TOAST ── */
+  #zoomPanToast {
+    position: absolute;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(20,21,23,0.88);
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-size: 11px;
+    color: var(--text-dim);
+    pointer-events: none;
+    white-space: nowrap;
+    z-index: 100;
+    backdrop-filter: blur(8px);
+    opacity: 0;
+    transition: opacity 0.4s;
+  }
+  #zoomPanToast.visible { opacity: 1; }
+
+  /* Backdrop for menu close */
+  #menuBackdrop {
+    position: fixed; inset: 0;
+    z-index: 300; display: none;
+  }
+  #menuBackdrop.visible { display: block; }
 </style>
 </head>
 <body>
 
 <header>
-  <div class="logo">Pixel<span>⇅</span>Sort</div>
-  <div class="logo-sub">image pixel sorter</div>
-  <a href="https://ericcharl.es" target="_blank" rel="noopener" class="header-link">ericcharl.es ↗</a>
+  <img id="logoImg" src="logo.png" alt="Pixel Sort">
+  <div class="header-right">
+    <a href="https://ericcharl.es" target="_blank" rel="noopener" class="header-link">ericcharl.es ↗</a>
+    <button class="icon-btn" id="menuBtn" title="More options">
+      <svg viewBox="0 0 24 24" fill="currentColor">
+        <circle cx="12" cy="5"  r="1.6"/>
+        <circle cx="12" cy="12" r="1.6"/>
+        <circle cx="12" cy="19" r="1.6"/>
+      </svg>
+    </button>
+  </div>
 </header>
+
+<!-- THREE-DOT MENU -->
+<div id="threeMenu">
+  <button class="menu-item" id="howToMenuBtn">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="10"/>
+      <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+      <circle cx="12" cy="17" r=".5" fill="currentColor"/>
+    </svg>
+    How to Use
+  </button>
+  <button class="menu-item" id="aboutMenuBtn">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="10"/>
+      <line x1="12" y1="8"  x2="12" y2="12"/>
+      <circle cx="12" cy="16" r=".5" fill="currentColor"/>
+    </svg>
+    About
+  </button>
+  <button class="menu-item" id="donateMenuBtn">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+    </svg>
+    Donate
+  </button>
+</div>
+<div id="menuBackdrop"></div>
 
 <div class="app">
 
   <!-- SIDEBAR -->
   <div class="sidebar">
+  <div class="sidebar-scroll">
 
     <div class="settings-group">
       <div class="settings-group-title">Source</div>
@@ -345,12 +570,12 @@
         <div class="angle-wheel-container" id="angleWheelContainer">
           <canvas id="angleWheel" height="36"></canvas>
         </div>
-        <div class="size-note" id="angleNote">0° = horizontal · 90° = vertical · drag wheel or click dial</div>
+        <div class="size-note" style="margin-top:4px;">0° = horizontal · 90° = vertical · drag wheel or dial</div>
         <div class="size-note" style="color:var(--text-dimmer);margin-top:2px;" id="anglePerfNote"></div>
       </div>
 
-      <div class="toggle-row" style="margin-top:12px;">
-        <span class="toggle-label">Invert</span>
+      <div class="toggle-row" style="margin-top:4px;">
+        <span class="toggle-label">Invert sort order</span>
         <label class="toggle">
           <input type="checkbox" id="invert">
           <span class="toggle-track"></span>
@@ -368,10 +593,99 @@
           </div>
         </div>
         <input type="range" id="threshold" min="0" max="255" value="80">
-        <div class="size-note">Pixels below this brightness break sort runs</div>
+        <div class="size-note" style="margin-top:4px;">Pixels below this brightness break sort runs</div>
       </div>
     </div>
 
+    <!-- MASK SECTION -->
+    <div class="settings-group">
+      <div class="settings-group-title">Mask</div>
+
+      <div class="mask-tool-row">
+        <button class="tool-btn" id="drawToolBtn" title="Toggle draw mode">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 19l7-7 3 3-7 7-3-3z"/>
+            <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/>
+            <circle cx="11" cy="11" r="2"/>
+          </svg>
+          Draw
+        </button>
+        <button class="tool-btn" id="eraseToolBtn" title="Toggle erase mode">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 20H7L3 16l10-10 7 7-2.5 2.5"/>
+            <path d="M6 17L17 6"/>
+          </svg>
+          Erase
+        </button>
+        <button class="tool-btn tool-btn-danger" id="clearMaskBtn" title="Clear entire mask">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="3 6 5 6 21 6"/>
+            <path d="M19 6l-1 14H6L5 6"/>
+            <path d="M10 11v6"/><path d="M14 11v6"/>
+          </svg>
+          Clear
+        </button>
+      </div>
+
+      <div class="undo-redo-row">
+        <button class="tool-btn" id="undoMaskBtn" disabled>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 7v6h6"/><path d="M3 13C5 8 9 5 14 5a9 9 0 0 1 0 18c-4 0-7.5-2-9-5"/>
+          </svg>
+          Undo
+        </button>
+        <button class="tool-btn" id="redoMaskBtn" disabled>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 7v6h-6"/><path d="M21 13c-2 5-6 8-11 8a9 9 0 0 1 0-18c4 0 7.5 2 9 5"/>
+          </svg>
+          Redo
+        </button>
+      </div>
+
+      <div class="field">
+        <div class="field-label">
+          <span>Brush size</span>
+          <div class="field-value-wrap">
+            <input class="field-value" id="brushVal" type="number" min="2" max="120" value="20" title="Click to type">
+            <span style="font-size:10px;color:var(--text-dimmer);margin-left:2px;">px</span>
+          </div>
+        </div>
+        <input type="range" id="brushSlider" min="2" max="120" value="20">
+      </div>
+
+      <div class="mask-hint">Left-click draw · Right-click erase · Scroll zoom · Middle-click pan · Click active tool again to exit</div>
+
+      <div class="mask-section-divider"></div>
+
+      <div class="toggle-row">
+        <span class="toggle-label">Extend to border</span>
+        <label class="toggle">
+          <input type="checkbox" id="extendMask" checked>
+          <span class="toggle-track"></span>
+        </label>
+      </div>
+      <div id="fadeRow" class="toggle-row">
+        <span class="toggle-label">Fade</span>
+        <label class="toggle">
+          <input type="checkbox" id="fadeEnabled">
+          <span class="toggle-track"></span>
+        </label>
+      </div>
+      <div id="fadeFieldRow" class="field" style="margin-bottom:0">
+        <div class="field-label">
+          <span>Fade length</span>
+          <div class="field-value-wrap">
+            <input class="field-value" id="fadeVal" type="number" min="1" max="9999" value="600" style="max-width:52px;" title="Click to type">
+            <span style="font-size:10px;color:var(--text-dimmer);margin-left:2px;">px</span>
+          </div>
+        </div>
+        <input type="range" id="fadeSlider" min="1" max="9999" value="600">
+      </div>
+    </div>
+
+  </div><!-- /.sidebar-scroll -->
+
+  <div class="sidebar-bottom">
     <div class="settings-group">
       <div class="settings-group-title">Actions</div>
       <button class="process-btn" id="processBtn" disabled>▶ Sort</button>
@@ -383,49 +697,210 @@
       <div class="status-dot" id="statusDot"></div>
       <span id="statusText">No image loaded</span>
     </div>
+  </div><!-- /.sidebar-bottom -->
 
-  </div>
+  </div><!-- /.sidebar -->
 
-  <!-- CANVAS -->
+  <!-- CANVAS AREA -->
   <div class="canvas-area" id="canvasArea">
     <div class="drop-overlay" id="dropOverlay">
       <div class="drop-icon">⬡</div>
       <div class="drop-title">Drop an image here</div>
       <div class="drop-sub">or click Browse — JPG, PNG, WebP, etc.</div>
     </div>
-    <canvas id="b"></canvas>
+    <div id="canvasWrap">
+      <canvas id="b"></canvas>
+      <canvas id="maskCanvas"></canvas>
+    </div>
+    <div id="zoomPanToast">Scroll to zoom &nbsp;·&nbsp; Left-click or Middle-click to pan</div>
   </div>
+
+<!-- BRUSH SIZE FLOAT (positioned beside sidebar at slider level) -->
+<div id="brushSizeFloat"><canvas id="brushSizePreview"></canvas></div>
 
 </div>
 
+<!-- BRUSH CURSOR -->
+<div id="brushCursor"></div>
+
+<!-- HOW TO USE MODAL -->
+<div id="howToModal" class="modal-overlay">
+  <div class="modal-card">
+    <div class="modal-header">
+      <span class="modal-title">HOW TO USE</span>
+      <button class="modal-close" data-close="howToModal">✕</button>
+    </div>
+    <div class="modal-body">
+      <h3>Getting started</h3>
+      <ol>
+        <li>Click <strong>Browse image</strong> or drag and drop a file onto the canvas to load a photo.</li>
+        <li>Use the <strong>scroll wheel</strong> to zoom, left click or middle mouse click to pan.</li>
+        <li>Set the <strong>Angle</strong> to control sort direction — drag the scroll wheel left/right, or drag the arrow on the dial. <strong>0° and 90° are the fastest angles</strong>; diagonal angles take a bit longer.</li>
+        <li>Adjust <strong>Threshold</strong> to control how much of the image gets sorted. Lower values = fewer, longer streaks. Higher = more broken-up segments.</li>
+        <li>Toggle <strong>Invert sort order</strong> to flip whether pixels sort light-to-dark or dark-to-light.</li>
+        <li>Click <strong>▶ Sort</strong> to apply the effect. You can change settings and sort again as many times as you like.</li>
+        <li>Click <strong>Download PNG</strong> to save the result.</li>
+      </ol>
+      <h3>Using the mask</h3>
+      <p>The mask lets you limit pixel sorting to a specific area of the image.</p>
+      <ol>
+        <li>In the <strong>Mask</strong> section of the sidebar, click <strong>Draw</strong> to enter draw mode. The purple mask overlay will appear on the canvas.</li>
+        <li><strong>Left-click and drag</strong> on the image to paint the mask. <strong>Right-click and drag</strong> to erase (works in both Draw and Erase modes).</li>
+        <li>Click <strong>Erase</strong> to switch to erase mode — left-click will erase instead.</li>
+        <li>Use the <strong>scroll wheel</strong> to zoom in and out (centered on your cursor). <strong>Middle-click and drag</strong> to pan around the zoomed image.</li>
+        <li>Adjust <strong>Brush size</strong> with the slider or type a value. <strong>Undo</strong> and <strong>Redo</strong> step through your brush strokes (up to 20 steps). <strong>Clear</strong> removes the entire mask (also undoable).</li>
+        <li>Click the active tool button again to <strong>exit mask mode</strong> — the overlay hides but your mask is preserved.</li>
+        <li>Toggle <strong>Extend to border</strong> to stretch the mask outward in the sort direction (set by Angle) all the way to the image edge.</li>
+        <li>When Extend is on, toggle <strong>Fade</strong> to blend the extended area back into the original image. Adjust <strong>Fade length</strong> to control how far the fade travels — higher values = longer, softer transition.</li>
+        <li>Click <strong>▶ Sort</strong> — the effect will only apply within your masked area.</li>
+      </ol>
+    </div>
+  </div>
+</div>
+
+<!-- ABOUT MODAL -->
+<div id="aboutModal" class="modal-overlay">
+  <div class="modal-card">
+    <div class="modal-header">
+      <span class="modal-title">ABOUT</span>
+      <button class="modal-close" data-close="aboutModal">✕</button>
+    </div>
+    <div class="modal-body">
+      <p><strong>Creative Pixel Sorter</strong> is a glitch art tool by <a href="https://ericcharl.es" target="_blank" rel="noopener">ericcharl.es</a>. All processing is done locally in your browser — no images are sent to any servers.</p>
+      <h3>Mobile app</h3>
+      <p>Want Creative Pixel Sorter on your phone? Download the mobile app from the Play Store for a more mobile-friendly experience. Only available on Android.</p>
+      <h3>Version</h3>
+      <p>1.0.1</p>
+    </div>
+  </div>
+</div>
+
 <script>
-const canvas     = document.getElementById('b');
-const ctx        = canvas.getContext('2d');
-const fileInput  = document.getElementById('fileInput');
-const browseBtn  = document.getElementById('browseBtn');
-const processBtn = document.getElementById('processBtn');
-const resetBtn   = document.getElementById('resetBtn');
-const downloadBtn= document.getElementById('downloadBtn');
-const dropOverlay= document.getElementById('dropOverlay');
-const canvasArea = document.getElementById('canvasArea');
-const statusDot  = document.getElementById('statusDot');
-const statusText = document.getElementById('statusText');
-const thresholdEl= document.getElementById('threshold');
-const thresholdVal=document.getElementById('thresholdVal');
-const angleVal   = document.getElementById('angleVal');
-const wheelCanvas = document.getElementById('angleWheel');
+// ══════════════════════════════════════════════════════
+//  DOM REFS
+// ══════════════════════════════════════════════════════
+const canvas       = document.getElementById('b');
+const ctx          = canvas.getContext('2d');
+const maskCanvas   = document.getElementById('maskCanvas');
+const maskCtx      = maskCanvas.getContext('2d');
+const maskDataCvs  = document.createElement('canvas');
+const maskDataCtx  = maskDataCvs.getContext('2d');
+const brushSzPrev  = document.getElementById('brushSizePreview');
+const brushSzCtx   = brushSzPrev.getContext('2d');
+const brushSzFloat = document.getElementById('brushSizeFloat');
+const brushCursor  = document.getElementById('brushCursor');
+const canvasWrap   = document.getElementById('canvasWrap');
+const canvasArea   = document.getElementById('canvasArea');
+const dropOverlay  = document.getElementById('dropOverlay');
+const fileInput    = document.getElementById('fileInput');
+const browseBtn    = document.getElementById('browseBtn');
+const processBtn   = document.getElementById('processBtn');
+const resetBtn     = document.getElementById('resetBtn');
+const downloadBtn  = document.getElementById('downloadBtn');
+const statusDot    = document.getElementById('statusDot');
+const statusText   = document.getElementById('statusText');
+const thresholdEl  = document.getElementById('threshold');
+const thresholdVal = document.getElementById('thresholdVal');
+const angleVal     = document.getElementById('angleVal');
+const wheelCanvas  = document.getElementById('angleWheel');
 const wheelContainer = document.getElementById('angleWheelContainer');
-const invertEl   = document.getElementById('invert');
+const invertEl     = document.getElementById('invert');
+const anglePerfNote= document.getElementById('anglePerfNote');
+const drawToolBtn  = document.getElementById('drawToolBtn');
+const eraseToolBtn = document.getElementById('eraseToolBtn');
+const clearMaskBtn = document.getElementById('clearMaskBtn');
+const undoMaskBtn  = document.getElementById('undoMaskBtn');
+const redoMaskBtn  = document.getElementById('redoMaskBtn');
+const brushSlider  = document.getElementById('brushSlider');
+const brushValEl   = document.getElementById('brushVal');
+const extendMaskEl = document.getElementById('extendMask');
+const fadeRow      = document.getElementById('fadeRow');
+const fadeFieldRow = document.getElementById('fadeFieldRow');
+const fadeEnabledEl= document.getElementById('fadeEnabled');
+const fadeSlider   = document.getElementById('fadeSlider');
+const fadeValEl    = document.getElementById('fadeVal');
 
-let loadedImg = null;
+// ══════════════════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════════════════
+let loadedImg      = null;
+let currentAngle   = 90;
+let maskActiveMode = null;   // null | 'draw' | 'erase'
+let maskTool       = 'draw'; // actual tool for current stroke
+let maskHasContent = false;
+let currentBrush   = 20;
+let currentFade    = 600;
+const MASK_HISTORY_LIMIT = 20;
+let maskHistory    = [];
+let maskRedoStack  = [];
+let isPainting     = false;
+let lastPt         = null;
+let brushPreviewTimer = null;
 
-// ── Status ────────────────────────────────────────────────────────────────────
+// Zoom / pan
+let zoomScale = 1, zoomPanX = 0, zoomPanY = 0;
+let isMidPanning = false;
+let panStartX = 0, panStartY = 0, panStartPanX = 0, panStartPanY = 0;
+
+// ══════════════════════════════════════════════════════
+//  STATUS
+// ══════════════════════════════════════════════════════
 function setStatus(state, msg) {
   statusDot.className = 'status-dot' + (state ? ' ' + state : '');
   statusText.textContent = msg;
 }
 
-// ── Threshold slider <-> input sync ───────────────────────────────────────────
+// ══════════════════════════════════════════════════════
+//  THREE-DOT MENU
+// ══════════════════════════════════════════════════════
+const menuBtn      = document.getElementById('menuBtn');
+const threeMenu    = document.getElementById('threeMenu');
+const menuBackdrop = document.getElementById('menuBackdrop');
+
+menuBtn.addEventListener('click', e => {
+  e.stopPropagation();
+  const open = !threeMenu.classList.contains('open');
+  threeMenu.classList.toggle('open', open);
+  menuBackdrop.classList.toggle('visible', open);
+});
+menuBackdrop.addEventListener('click', closeMenu);
+function closeMenu() {
+  threeMenu.classList.remove('open');
+  menuBackdrop.classList.remove('visible');
+}
+
+document.getElementById('howToMenuBtn').addEventListener('click', () => {
+  document.getElementById('howToModal').classList.add('open');
+  closeMenu();
+});
+document.getElementById('aboutMenuBtn').addEventListener('click', () => {
+  document.getElementById('aboutModal').classList.add('open');
+  closeMenu();
+});
+document.getElementById('donateMenuBtn').addEventListener('click', () => {
+  window.open('https://ko-fi.com/creativepixelsorter', '_blank');
+  closeMenu();
+});
+
+// ══════════════════════════════════════════════════════
+//  MODALS
+// ══════════════════════════════════════════════════════
+document.querySelectorAll('[data-close]').forEach(btn => {
+  btn.addEventListener('click', () => document.getElementById(btn.dataset.close).classList.remove('open'));
+});
+document.querySelectorAll('.modal-overlay').forEach(m => {
+  m.addEventListener('click', e => { if (e.target === m) m.classList.remove('open'); });
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    document.querySelectorAll('.modal-overlay.open').forEach(m => m.classList.remove('open'));
+    closeMenu();
+  }
+});
+
+// ══════════════════════════════════════════════════════
+//  THRESHOLD SYNC
+// ══════════════════════════════════════════════════════
 thresholdEl.addEventListener('input', () => { thresholdVal.value = thresholdEl.value; });
 thresholdVal.addEventListener('input', () => {
   const v = Math.min(255, Math.max(0, parseInt(thresholdVal.value) || 0));
@@ -437,15 +912,14 @@ thresholdVal.addEventListener('change', () => {
 });
 thresholdVal.addEventListener('keydown', e => { if (e.key === 'Enter') thresholdVal.blur(); });
 
-// ── Angle dial + scroll wheel ─────────────────────────────────────────────────
-const dialCanvas    = document.getElementById('angleDial');
-const dialCtx       = dialCanvas.getContext('2d');
-const wCtx          = wheelCanvas.getContext('2d');
-const angleHint     = document.getElementById('angleHint');
-const anglePerfNote = document.getElementById('anglePerfNote');
-
-let currentAngle = 90;
-const PPD = 2; // pixels per degree for the scroll wheel
+// ══════════════════════════════════════════════════════
+//  ANGLE DIAL + SCROLL WHEEL
+// ══════════════════════════════════════════════════════
+const dialCanvas = document.getElementById('angleDial');
+const dialCtx    = dialCanvas.getContext('2d');
+const wCtx       = wheelCanvas.getContext('2d');
+const angleHint  = document.getElementById('angleHint');
+const PPD = 2;
 
 function setAngle(deg) {
   currentAngle = ((deg % 360) + 360) % 360;
@@ -458,11 +932,10 @@ function setAngle(deg) {
 function updateHints(deg) {
   const n = ((Math.round(deg) % 360) + 360) % 360;
   const isAxis = n % 90 === 0;
-  if (n === 0 || n === 180)       angleHint.textContent = 'Horizontal sort';
-  else if (n === 90 || n === 270) angleHint.textContent = 'Vertical sort';
-  else if (n % 45 === 0)          angleHint.textContent = `Diagonal sort (${n}°)`;
-  else                            angleHint.textContent = `${n}° sort`;
-
+  if (n === 0 || n === 180)        angleHint.textContent = 'Horizontal sort';
+  else if (n === 90 || n === 270)  angleHint.textContent = 'Vertical sort';
+  else if (n % 45 === 0)           angleHint.textContent = `Diagonal sort (${n}°)`;
+  else                             angleHint.textContent = `${n}° sort`;
   if (isAxis) {
     anglePerfNote.textContent = '⚡ Fast — axis-aligned sort';
     anglePerfNote.style.color = 'var(--green)';
@@ -472,210 +945,198 @@ function updateHints(deg) {
   }
 }
 
-// ── Draw dial ─────────────────────────────────────────────────────────────────
 function drawDial(deg) {
   const W = dialCanvas.width, H = dialCanvas.height;
-  const cx = W / 2, cy = H / 2, r = cx - 4;
+  const cx = W/2, cy = H/2, r = cx - 4;
   const rad = deg * Math.PI / 180;
   dialCtx.clearRect(0, 0, W, H);
-
-  // BG circle
-  dialCtx.beginPath();
-  dialCtx.arc(cx, cy, r, 0, Math.PI * 2);
-  dialCtx.fillStyle = '#1c1e21';
-  dialCtx.fill();
-  dialCtx.strokeStyle = '#2a2d31';
-  dialCtx.lineWidth = 1;
-  dialCtx.stroke();
-
-  // Tick marks
+  dialCtx.beginPath(); dialCtx.arc(cx,cy,r,0,Math.PI*2);
+  dialCtx.fillStyle='#1c1e21'; dialCtx.fill();
+  dialCtx.strokeStyle='#2a2d31'; dialCtx.lineWidth=1; dialCtx.stroke();
   [0,45,90,135,180,225,270,315].forEach(t => {
-    const tr = t * Math.PI / 180;
-    const isCard = t % 90 === 0;
+    const tr = t*Math.PI/180, isCard = t%90===0;
     dialCtx.beginPath();
-    dialCtx.moveTo(cx + Math.cos(tr)*(r-(isCard?7:4)), cy + Math.sin(tr)*(r-(isCard?7:4)));
-    dialCtx.lineTo(cx + Math.cos(tr)*(r-1),            cy + Math.sin(tr)*(r-1));
-    dialCtx.strokeStyle = isCard ? '#383c42' : '#2a2d31';
-    dialCtx.lineWidth   = isCard ? 1.5 : 1;
-    dialCtx.stroke();
+    dialCtx.moveTo(cx+Math.cos(tr)*(r-(isCard?7:4)), cy+Math.sin(tr)*(r-(isCard?7:4)));
+    dialCtx.lineTo(cx+Math.cos(tr)*(r-1), cy+Math.sin(tr)*(r-1));
+    dialCtx.strokeStyle = isCard?'#383c42':'#2a2d31';
+    dialCtx.lineWidth = isCard?1.5:1; dialCtx.stroke();
   });
-
-  // Cross-hair
   dialCtx.beginPath();
-  dialCtx.moveTo(cx-r+6, cy); dialCtx.lineTo(cx+r-6, cy);
-  dialCtx.moveTo(cx, cy-r+6); dialCtx.lineTo(cx, cy+r-6);
-  dialCtx.strokeStyle = '#242628'; dialCtx.lineWidth = 1;
-  dialCtx.stroke();
-
-  // Direction line
+  dialCtx.moveTo(cx-r+6,cy); dialCtx.lineTo(cx+r-6,cy);
+  dialCtx.moveTo(cx,cy-r+6); dialCtx.lineTo(cx,cy+r-6);
+  dialCtx.strokeStyle='#242628'; dialCtx.lineWidth=1; dialCtx.stroke();
   const lx = Math.cos(rad)*(r-6), ly = Math.sin(rad)*(r-6);
   dialCtx.beginPath();
-  dialCtx.moveTo(cx-lx, cy-ly); dialCtx.lineTo(cx+lx, cy+ly);
-  dialCtx.strokeStyle = '#a855f7'; dialCtx.lineWidth = 2;
-  dialCtx.lineCap = 'round'; dialCtx.stroke();
-
-  // Arrow head
-  const ax = cx+lx, ay = cy+ly, al = 6, aa = 0.45;
+  dialCtx.moveTo(cx-lx,cy-ly); dialCtx.lineTo(cx+lx,cy+ly);
+  dialCtx.strokeStyle='#a855f7'; dialCtx.lineWidth=2;
+  dialCtx.lineCap='round'; dialCtx.stroke();
+  const ax=cx+lx, ay=cy+ly, al=6, aa=0.45;
   dialCtx.beginPath();
-  dialCtx.moveTo(ax, ay);
-  dialCtx.lineTo(ax - al*Math.cos(rad-aa), ay - al*Math.sin(rad-aa));
-  dialCtx.moveTo(ax, ay);
-  dialCtx.lineTo(ax - al*Math.cos(rad+aa), ay - al*Math.sin(rad+aa));
-  dialCtx.strokeStyle = '#a855f7'; dialCtx.lineWidth = 1.5;
-  dialCtx.stroke();
-
-  // Center dot
-  dialCtx.beginPath();
-  dialCtx.arc(cx, cy, 2.5, 0, Math.PI*2);
-  dialCtx.fillStyle = '#a855f7'; dialCtx.fill();
+  dialCtx.moveTo(ax,ay); dialCtx.lineTo(ax-al*Math.cos(rad-aa), ay-al*Math.sin(rad-aa));
+  dialCtx.moveTo(ax,ay); dialCtx.lineTo(ax-al*Math.cos(rad+aa), ay-al*Math.sin(rad+aa));
+  dialCtx.strokeStyle='#a855f7'; dialCtx.lineWidth=1.5; dialCtx.stroke();
+  dialCtx.beginPath(); dialCtx.arc(cx,cy,2.5,0,Math.PI*2);
+  dialCtx.fillStyle='#a855f7'; dialCtx.fill();
 }
 
-// ── Draw scroll wheel ─────────────────────────────────────────────────────────
 function drawWheel(deg) {
   const W = wheelCanvas.width, H = wheelCanvas.height;
-  wCtx.clearRect(0, 0, W, H);
-  wCtx.fillStyle = '#1c1e21';
-  wCtx.fillRect(0, 0, W, H);
-
-  const cx = W / 2;
-  const degsVisible = W / 2 / PPD + 2;
-
-  for (let d = Math.floor(deg - degsVisible); d <= Math.ceil(deg + degsVisible); d++) {
-    const n = ((d % 360) + 360) % 360;
-    const x = cx + (d - deg) * PPD;
+  wCtx.clearRect(0,0,W,H);
+  wCtx.fillStyle='#1c1e21'; wCtx.fillRect(0,0,W,H);
+  const cx = W/2;
+  const degsVisible = W/2/PPD+2;
+  for (let d = Math.floor(deg-degsVisible); d <= Math.ceil(deg+degsVisible); d++) {
+    const n = ((d%360)+360)%360;
+    const x = cx+(d-deg)*PPD;
     let tickH, strokeStyle, lw;
-    if      (n % 90 === 0) { tickH = H * 0.72; strokeStyle = '#555a63'; lw = 1.5; }
-    else if (n % 45 === 0) { tickH = H * 0.50; strokeStyle = '#383c42'; lw = 1; }
-    else if (n % 15 === 0) { tickH = H * 0.32; strokeStyle = '#2a2d31'; lw = 1; }
-    else if (n % 5  === 0) { tickH = H * 0.18; strokeStyle = '#242628'; lw = 1; }
+    if      (n%90===0) { tickH=H*0.72; strokeStyle='#555a63'; lw=1.5; }
+    else if (n%45===0) { tickH=H*0.50; strokeStyle='#383c42'; lw=1; }
+    else if (n%15===0) { tickH=H*0.32; strokeStyle='#2a2d31'; lw=1; }
+    else if (n%5 ===0) { tickH=H*0.18; strokeStyle='#242628'; lw=1; }
     else continue;
-
     wCtx.beginPath();
-    wCtx.moveTo(x, H/2 - tickH/2);
-    wCtx.lineTo(x, H/2 + tickH/2);
-    wCtx.strokeStyle = strokeStyle;
-    wCtx.lineWidth = lw;
-    wCtx.stroke();
-
-    // Cardinal labels
-    if (n % 90 === 0) {
-      wCtx.fillStyle = '#555a63';
-      wCtx.font = '8px IBM Plex Mono, monospace';
-      wCtx.textAlign = 'center';
-      wCtx.fillText(n + '°', x, H - 3);
+    wCtx.moveTo(x, H/2-tickH/2); wCtx.lineTo(x, H/2+tickH/2);
+    wCtx.strokeStyle=strokeStyle; wCtx.lineWidth=lw; wCtx.stroke();
+    if (n%90===0) {
+      wCtx.fillStyle='#555a63';
+      wCtx.font='8px IBM Plex Mono,monospace';
+      wCtx.textAlign='center';
+      wCtx.fillText(n+'°', x, H-3);
     }
   }
-
-  // Center indicator line (accent)
-  wCtx.beginPath();
-  wCtx.moveTo(cx, 0); wCtx.lineTo(cx, H);
-  wCtx.strokeStyle = '#a855f7'; wCtx.lineWidth = 1.5;
-  wCtx.stroke();
-
-  // Fade edges
-  const grad = wCtx.createLinearGradient(0, 0, W, 0);
-  grad.addColorStop(0,    '#1c1e21');
-  grad.addColorStop(0.12, 'rgba(28,30,33,0)');
-  grad.addColorStop(0.88, 'rgba(28,30,33,0)');
-  grad.addColorStop(1,    '#1c1e21');
-  wCtx.fillStyle = grad;
-  wCtx.fillRect(0, 0, W, H);
+  wCtx.beginPath(); wCtx.moveTo(cx,0); wCtx.lineTo(cx,H);
+  wCtx.strokeStyle='#a855f7'; wCtx.lineWidth=1.5; wCtx.stroke();
+  const grad = wCtx.createLinearGradient(0,0,W,0);
+  grad.addColorStop(0,'#1c1e21'); grad.addColorStop(0.12,'rgba(28,30,33,0)');
+  grad.addColorStop(0.88,'rgba(28,30,33,0)'); grad.addColorStop(1,'#1c1e21');
+  wCtx.fillStyle=grad; wCtx.fillRect(0,0,W,H);
 }
 
-// Resize wheel canvas to match container width
 function resizeWheel() {
   wheelCanvas.width = wheelContainer.offsetWidth;
   drawWheel(currentAngle);
 }
-window.addEventListener('resize', resizeWheel);
+window.addEventListener('resize', () => { resizeWheel(); resizeMaskCanvas(); });
 
-// ── Dial interaction (click + drag to set angle) ───────────────────────────────
+// Dial interaction
 let dialDragging = false;
-
 function angleFromDialEvent(e) {
   const rect = dialCanvas.getBoundingClientRect();
-  const x = (e.clientX - rect.left) - rect.width  / 2;
-  const y = (e.clientY - rect.top)  - rect.height / 2;
-  return ((Math.atan2(y, x) * 180 / Math.PI) + 360) % 360;
+  const x = (e.clientX-rect.left)-rect.width/2;
+  const y = (e.clientY-rect.top)-rect.height/2;
+  return ((Math.atan2(y,x)*180/Math.PI)+360)%360;
 }
+dialCanvas.addEventListener('mousedown', e => { dialDragging=true; setAngle(angleFromDialEvent(e)); e.preventDefault(); });
 
-dialCanvas.addEventListener('mousedown', e => {
-  dialDragging = true;
-  setAngle(angleFromDialEvent(e));
-  e.preventDefault();
-});
-dialCanvas.addEventListener('touchstart', e => {
-  dialDragging = true;
-  setAngle(angleFromDialEvent(e.touches[0]));
-  e.preventDefault();
-}, { passive: false });
-
-// ── Wheel interaction (drag horizontally) ─────────────────────────────────────
-let wheelDragging = false;
-let wheelStartX   = 0;
-let wheelStartAngle = 0;
-
+// Wheel drag
+let wheelDragging=false, wheelStartX=0, wheelStartAngle=0;
 wheelCanvas.addEventListener('mousedown', e => {
-  wheelDragging   = true;
-  wheelStartX     = e.clientX;
-  wheelStartAngle = currentAngle;
-  e.preventDefault();
+  wheelDragging=true; wheelStartX=e.clientX; wheelStartAngle=currentAngle; e.preventDefault();
 });
-wheelCanvas.addEventListener('touchstart', e => {
-  wheelDragging   = true;
-  wheelStartX     = e.touches[0].clientX;
-  wheelStartAngle = currentAngle;
-  e.preventDefault();
-}, { passive: false });
 
-// ── Global move / up ──────────────────────────────────────────────────────────
 window.addEventListener('mousemove', e => {
-  if (dialDragging)  setAngle(angleFromDialEvent(e));
-  if (wheelDragging) setAngle(wheelStartAngle + (e.clientX - wheelStartX) / PPD);
+  if (dialDragging) setAngle(angleFromDialEvent(e));
+  if (wheelDragging) setAngle(wheelStartAngle+(e.clientX-wheelStartX)/PPD);
+  if (isMidPanning) {
+    zoomPanX = panStartPanX+(e.clientX-panStartX);
+    zoomPanY = panStartPanY+(e.clientY-panStartY);
+    clampPan(); applyZoomTransform();
+  }
+  if (isPainting && maskActiveMode) {
+    const pt = getCanvasPoint(e);
+    paintStroke(lastPt, pt);
+    lastPt = pt;
+  }
+  updateBrushCursor(e);
 });
-window.addEventListener('touchmove', e => {
-  if (dialDragging)  setAngle(angleFromDialEvent(e.touches[0]));
-  if (wheelDragging) setAngle(wheelStartAngle + (e.touches[0].clientX - wheelStartX) / PPD);
-}, { passive: false });
-window.addEventListener('mouseup',  () => { dialDragging = false; wheelDragging = false; });
-window.addEventListener('touchend', () => { dialDragging = false; wheelDragging = false; });
+window.addEventListener('mouseup', e => {
+  dialDragging=false; wheelDragging=false;
+  isMidPanning=false;
+  if (isPainting) { isPainting=false; lastPt=null; }
+  if (e.button===1) canvasArea.style.cursor='';
+});
 
-// ── Typed input sync ──────────────────────────────────────────────────────────
-angleVal.addEventListener('input', () => {
-  const v = parseInt(angleVal.value);
-  if (!isNaN(v)) setAngle(v);
-});
-angleVal.addEventListener('change', () => {
-  const v = parseInt(angleVal.value) || 0;
-  setAngle(v);
-});
-angleVal.addEventListener('keydown', e => { if (e.key === 'Enter') angleVal.blur(); });
+angleVal.addEventListener('input', () => { const v=parseInt(angleVal.value); if(!isNaN(v)) setAngle(v); });
+angleVal.addEventListener('change', () => setAngle(parseInt(angleVal.value)||0));
+angleVal.addEventListener('keydown', e => { if(e.key==='Enter') angleVal.blur(); });
 
-// Initial render (after DOM paint so container has width)
 requestAnimationFrame(() => { resizeWheel(); setAngle(90); });
 
-// ── File handling ─────────────────────────────────────────────────────────────
-browseBtn.addEventListener('click', () => fileInput.click());
-fileInput.addEventListener('change', e => { if (e.target.files[0]) loadImage(e.target.files[0]); });
+// ══════════════════════════════════════════════════════
+//  ZOOM / PAN
+// ══════════════════════════════════════════════════════
+function applyZoomTransform() {
+  canvasWrap.style.transform = `translate(${zoomPanX}px,${zoomPanY}px) scale(${zoomScale})`;
+}
+function resetZoom() {
+  zoomScale=1; zoomPanX=0; zoomPanY=0;
+  canvasWrap.style.transform='';
+}
+function clampPan() {
+  if (!loadedImg) return;
+  const maxX = canvasArea.clientWidth  * (zoomScale-1) / 2;
+  const maxY = canvasArea.clientHeight * (zoomScale-1) / 2;
+  zoomPanX = Math.max(-maxX, Math.min(maxX, zoomPanX));
+  zoomPanY = Math.max(-maxY, Math.min(maxY, zoomPanY));
+}
 
+// Scroll to zoom (centered on cursor)
+canvasArea.addEventListener('wheel', e => {
+  if (!loadedImg) return;
+  e.preventDefault();
+  const rect = canvasArea.getBoundingClientRect();
+  const localX = e.clientX - rect.left;
+  const localY = e.clientY - rect.top;
+  const W = rect.width, H = rect.height;
+  const wrappedX = (localX - W/2 - zoomPanX) / zoomScale + W/2;
+  const wrappedY = (localY - H/2 - zoomPanY) / zoomScale + H/2;
+  const factor = e.deltaY < 0 ? 1.12 : 0.9;
+  const newScale = Math.min(10, Math.max(1, zoomScale * factor));
+  zoomPanX = localX - W/2 - (wrappedX - W/2) * newScale;
+  zoomPanY = localY - H/2 - (wrappedY - H/2) * newScale;
+  zoomScale = newScale;
+  clampPan(); applyZoomTransform();
+  if (zoomScale <= 1.01) resetZoom();
+}, { passive: false });
+
+// Left-click pan (when no mask mode) or middle-click pan (always)
+canvasArea.addEventListener('mousedown', e => {
+  if (!loadedImg) return;
+  const isLeftPan  = e.button === 0 && !maskActiveMode;
+  const isMidClick = e.button === 1;
+  if (isLeftPan || isMidClick) {
+    e.preventDefault();
+    isMidPanning = true;
+    panStartX = e.clientX; panStartY = e.clientY;
+    panStartPanX = zoomPanX; panStartPanY = zoomPanY;
+    canvasArea.style.cursor = 'grabbing';
+  }
+});
+canvasArea.addEventListener('mouseleave', () => {
+  brushCursor.classList.remove('visible');
+});
+canvasArea.addEventListener('mouseenter', () => {
+  if (maskActiveMode) brushCursor.classList.add('visible');
+});
+
+// ══════════════════════════════════════════════════════
+//  FILE HANDLING
+// ══════════════════════════════════════════════════════
+browseBtn.addEventListener('click', () => fileInput.click());
+fileInput.addEventListener('change', e => { if (e.target.files[0]) loadImage(e.target.files[0]); fileInput.value=''; });
 dropOverlay.addEventListener('click', () => fileInput.click());
 
-// Drag-drop on overlay
 dropOverlay.addEventListener('dragover',  e => { e.preventDefault(); dropOverlay.classList.add('drag-over'); });
 dropOverlay.addEventListener('dragleave', () => dropOverlay.classList.remove('drag-over'));
 dropOverlay.addEventListener('drop', e => {
-  e.preventDefault();
-  dropOverlay.classList.remove('drag-over');
+  e.preventDefault(); dropOverlay.classList.remove('drag-over');
   const file = e.dataTransfer.files[0];
   if (file && file.type.startsWith('image/')) loadImage(file);
 });
-
-// Also allow drag-drop anywhere on canvas area once image is loaded
 canvasArea.addEventListener('dragover',  e => { e.preventDefault(); canvasArea.classList.add('drag-over'); });
 canvasArea.addEventListener('dragleave', () => canvasArea.classList.remove('drag-over'));
 canvasArea.addEventListener('drop', e => {
-  e.preventDefault();
-  canvasArea.classList.remove('drag-over');
+  e.preventDefault(); canvasArea.classList.remove('drag-over');
   const file = e.dataTransfer.files[0];
   if (file && file.type.startsWith('image/')) loadImage(file);
 });
@@ -686,28 +1147,37 @@ function loadImage(file) {
     const img = new Image();
     img.onload = () => {
       loadedImg = img;
-      canvas.width  = img.width;
-      canvas.height = img.height;
+      canvas.width = img.width; canvas.height = img.height;
       ctx.drawImage(img, 0, 0);
       dropOverlay.classList.add('hidden');
+      canvasWrap.classList.add('visible');
       processBtn.disabled = false;
       resetBtn.disabled   = false;
       downloadBtn.disabled= false;
       setStatus('ready', `${img.width}×${img.height} — ready`);
+      // Reset mask
+      maskDataCtx.clearRect(0, 0, maskDataCvs.width, maskDataCvs.height);
+      maskHasContent = false;
+      maskHistory = []; maskRedoStack = [];
+      updateUndoRedoBtns();
+      resetZoom();
+      resizeMaskCanvas();
+      showZoomPanToast();
     };
     img.src = e.target.result;
   };
   reader.readAsDataURL(file);
 }
 
-// ── Reset ─────────────────────────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════
+//  RESET + DOWNLOAD
+// ══════════════════════════════════════════════════════
 resetBtn.addEventListener('click', () => {
   if (!loadedImg) return;
   ctx.drawImage(loadedImg, 0, 0);
   setStatus('ready', `${loadedImg.width}×${loadedImg.height} — reset`);
 });
 
-// ── Download ──────────────────────────────────────────────────────────────────
 downloadBtn.addEventListener('click', () => {
   const link = document.createElement('a');
   link.download = `sorted_${Math.round(currentAngle)}deg_t${thresholdEl.value}.png`;
@@ -715,11 +1185,14 @@ downloadBtn.addEventListener('click', () => {
   link.click();
 });
 
-// ── Process ───────────────────────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════
+//  SORT
+// ══════════════════════════════════════════════════════
 processBtn.addEventListener('click', sort);
 
 function sort() {
   if (!loadedImg) return;
+  if (maskActiveMode) setMaskActiveMode(maskActiveMode); // toggles off without clearing mask
   ctx.drawImage(loadedImg, 0, 0);
   const threshold = parseInt(thresholdEl.value);
   const angle     = Math.round(currentAngle);
@@ -729,10 +1202,12 @@ function sort() {
   processBtn.disabled = true;
   processBtn.innerHTML = '<span class="spinner"></span> Sorting…';
 
-  // Yield to let UI update before the sync loop
   setTimeout(() => {
-    pixelSortAngle(threshold, invert, angle);
-
+    if (maskHasContent) {
+      sortWithMask(threshold, invert, angle);
+    } else {
+      pixelSortAngle(threshold, invert, angle);
+    }
     const w = canvas.width, h = canvas.height;
     setStatus('ready', `${w}×${h} — sorted (${angle}°, t=${threshold})`);
     processBtn.disabled = false;
@@ -740,114 +1215,434 @@ function sort() {
   }, 20);
 }
 
-// ── Sort algorithms ───────────────────────────────────────────────────────────
-function meanSort(a, b) {
-  return ((a.r+a.g+a.b)/3) - ((b.r+b.g+b.b)/3);
-}
-function meanSortInv(a, b) {
-  return ((b.r+b.g+b.b)/3) - ((a.r+a.g+a.b)/3);
-}
+// ══════════════════════════════════════════════════════
+//  SORT ALGORITHMS
+// ══════════════════════════════════════════════════════
+function meanSort(a,b)    { return (a.r+a.g+a.b)/3-(b.r+b.g+b.b)/3; }
+function meanSortInv(a,b) { return (b.r+b.g+b.b)/3-(a.r+a.g+a.b)/3; }
 
 function getPixels(data) {
-  const p = [];
-  for (let i = 0; i < data.length; i += 4)
-    p.push({ r: data[i], g: data[i+1], b: data[i+2], a: data[i+3] });
+  const p=[];
+  for (let i=0;i<data.length;i+=4) p.push({r:data[i],g:data[i+1],b:data[i+2],a:data[i+3]});
   return p;
 }
-
-function setPixels(data, pixels) {
-  for (let i = 0; i < pixels.length; i++) {
-    data[i*4]   = pixels[i].r;
-    data[i*4+1] = pixels[i].g;
-    data[i*4+2] = pixels[i].b;
-    data[i*4+3] = pixels[i].a;
+function setPixels(data,pixels) {
+  for (let i=0;i<pixels.length;i++) {
+    data[i*4]=pixels[i].r; data[i*4+1]=pixels[i].g;
+    data[i*4+2]=pixels[i].b; data[i*4+3]=pixels[i].a;
   }
 }
-
-function findValueLess(pixels, val, start) {
-  for (let i = start; i < pixels.length; i++)
-    if ((pixels[i].r+pixels[i].g+pixels[i].b)/3 < val) return i;
+function findValueLess(pixels,val,start) {
+  for (let i=start;i<pixels.length;i++)
+    if ((pixels[i].r+pixels[i].g+pixels[i].b)/3<val) return i;
   return pixels.length;
 }
-
-function sortSegments(pixels, threshold, invert) {
-  const cmp = invert ? meanSortInv : meanSort;
-  let start = 0;
-  let end   = findValueLess(pixels, threshold, start);
-  while (start < pixels.length) {
-    const range = pixels.splice(start, end - start);
-    range.sort(cmp);
-    pixels.splice(start, 0, ...range);
-    start = end;
-    end   = findValueLess(pixels, threshold, start + 1);
-  }
-  return pixels;
-}
-
-function pixelSortH(threshold, invert) {
-  for (let row = 0; row < canvas.height; row++) {
-    const id     = ctx.getImageData(0, row, canvas.width, 1);
-    const pixels = getPixels(id.data);
-    sortSegments(pixels, threshold, invert);
-    setPixels(id.data, pixels);
-    ctx.putImageData(id, 0, row);
+function sortSegments(pixels,threshold,invert) {
+  const cmp = invert?meanSortInv:meanSort;
+  let s=0, e=findValueLess(pixels,threshold,s);
+  while (s<pixels.length) {
+    const r=pixels.splice(s,e-s); r.sort(cmp); pixels.splice(s,0,...r);
+    s=e; e=findValueLess(pixels,threshold,s+1);
   }
 }
+function pixelSortH(t,inv) {
+  for (let row=0;row<canvas.height;row++) {
+    const id=ctx.getImageData(0,row,canvas.width,1);
+    const px=getPixels(id.data); sortSegments(px,t,inv);
+    setPixels(id.data,px); ctx.putImageData(id,0,row);
+  }
+}
+function pixelSortV(t,inv) {
+  for (let col=0;col<canvas.width;col++) {
+    const id=ctx.getImageData(col,0,1,canvas.height);
+    const px=getPixels(id.data); sortSegments(px,t,inv);
+    setPixels(id.data,px); ctx.putImageData(id,col,0);
+  }
+}
+function pixelSortAngle(t,inv,angleDeg) {
+  const deg=((angleDeg%360)+360)%360;
+  if (deg===0||deg===180) return pixelSortH(t,inv);
+  if (deg===90||deg===270) return pixelSortV(t,inv);
+  const W=canvas.width, H=canvas.height;
+  const rad=deg*Math.PI/180;
+  const aC=Math.abs(Math.cos(rad)), aS=Math.abs(Math.sin(rad));
+  const rW=Math.ceil(W*aC+H*aS), rH=Math.ceil(W*aS+H*aC);
+  const tmp=document.createElement('canvas');
+  tmp.width=rW; tmp.height=rH;
+  const tc=tmp.getContext('2d');
+  tc.save(); tc.translate(rW/2,rH/2); tc.rotate(-rad);
+  tc.drawImage(canvas,-W/2,-H/2); tc.restore();
+  for (let row=0;row<rH;row++) {
+    const id=tc.getImageData(0,row,rW,1);
+    const px=getPixels(id.data); sortSegments(px,t,inv);
+    setPixels(id.data,px); tc.putImageData(id,0,row);
+  }
+  ctx.clearRect(0,0,W,H);
+  ctx.save(); ctx.translate(W/2,H/2); ctx.rotate(rad);
+  ctx.drawImage(tmp,-rW/2,-rH/2); ctx.restore();
+}
 
-function pixelSortV(threshold, invert) {
-  for (let col = 0; col < canvas.width; col++) {
-    const id     = ctx.getImageData(col, 0, 1, canvas.height);
-    const pixels = getPixels(id.data);
-    sortSegments(pixels, threshold, invert);
-    setPixels(id.data, pixels);
-    ctx.putImageData(id, col, 0);
+// ══════════════════════════════════════════════════════
+//  MASK SYSTEM
+// ══════════════════════════════════════════════════════
+
+// ── Mask canvas sizing ────────────────────────────────
+function resizeMaskCanvas() {
+  if (!loadedImg) return;
+  maskCanvas.style.left   = canvas.offsetLeft + 'px';
+  maskCanvas.style.top    = canvas.offsetTop  + 'px';
+  maskCanvas.style.width  = canvas.offsetWidth  + 'px';
+  maskCanvas.style.height = canvas.offsetHeight + 'px';
+  maskCanvas.width  = canvas.offsetWidth;
+  maskCanvas.height = canvas.offsetHeight;
+  // Keep offscreen data canvas at image resolution
+  const W = loadedImg.width, H = loadedImg.height;
+  if (maskDataCvs.width !== W || maskDataCvs.height !== H) {
+    let saved = null;
+    if (maskHasContent) {
+      try { saved = maskDataCtx.getImageData(0,0,maskDataCvs.width,maskDataCvs.height); } catch(e) {}
+    }
+    maskDataCvs.width = W; maskDataCvs.height = H;
+    if (saved) maskDataCtx.putImageData(saved,0,0);
+  }
+  syncMaskDisplay();
+}
+
+function syncMaskDisplay() {
+  maskCtx.clearRect(0,0,maskCanvas.width,maskCanvas.height);
+  if (!maskHasContent) return;
+  maskCtx.save();
+  maskCtx.globalAlpha = 0.7;
+  maskCtx.drawImage(maskDataCvs,0,0,maskCanvas.width,maskCanvas.height);
+  maskCtx.restore();
+}
+
+// ── Zoom/pan toast ────────────────────────────────────
+const zoomPanToast = document.getElementById('zoomPanToast');
+let toastTimer = null;
+function showZoomPanToast() {
+  zoomPanToast.classList.add('visible');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => zoomPanToast.classList.remove('visible'), 5000);
+}
+
+// ── Mode toggle (draw / erase, click again to exit) ───
+function setMaskActiveMode(mode) {
+  // If already active, deactivate
+  if (maskActiveMode === mode) { mode = null; }
+  maskActiveMode = mode;
+  drawToolBtn.classList.toggle('active',  mode === 'draw');
+  eraseToolBtn.classList.toggle('active', mode === 'erase');
+  maskCanvas.classList.toggle('visible',  mode !== null && !!loadedImg);
+  if (mode === null) {
+    brushCursor.classList.remove('visible');
+    canvasArea.style.cursor = '';
+    zoomPanToast.classList.remove('visible');
+    clearTimeout(toastTimer);
+  } else {
+    canvasArea.style.cursor = 'none';
+    if (loadedImg) syncMaskDisplay();
+    showZoomPanToast();
   }
 }
 
-function pixelSortAngle(threshold, invert, angleDeg) {
-  // Fast paths for axis-aligned angles
-  const deg = ((angleDeg % 360) + 360) % 360;
-  if (deg === 0 || deg === 180) return pixelSortH(threshold, invert);
-  if (deg === 90 || deg === 270) return pixelSortV(threshold, invert);
+drawToolBtn.addEventListener('click',  () => setMaskActiveMode('draw'));
+eraseToolBtn.addEventListener('click', () => setMaskActiveMode('erase'));
 
-  const W   = canvas.width;
-  const H   = canvas.height;
-  const rad = deg * Math.PI / 180;
-  const absCos = Math.abs(Math.cos(rad));
-  const absSin = Math.abs(Math.sin(rad));
+// ── Clear ─────────────────────────────────────────────
+clearMaskBtn.addEventListener('click', () => {
+  if (!loadedImg) return;
+  saveSnapshot();
+  maskDataCtx.clearRect(0,0,maskDataCvs.width,maskDataCvs.height);
+  maskCtx.clearRect(0,0,maskCanvas.width,maskCanvas.height);
+  maskHasContent = false;
+  updateUndoRedoBtns();
+});
 
-  // Temp canvas large enough to hold the image at any rotation
-  const rotW = Math.ceil(W * absCos + H * absSin);
-  const rotH = Math.ceil(W * absSin + H * absCos);
+// ── Undo / Redo ───────────────────────────────────────
+function saveSnapshot() {
+  if (!maskDataCvs.width || !maskDataCvs.height) return;
+  const snap = maskDataCtx.getImageData(0,0,maskDataCvs.width,maskDataCvs.height);
+  maskHistory.push(snap);
+  if (maskHistory.length > MASK_HISTORY_LIMIT) maskHistory.shift();
+  maskRedoStack = [];
+  updateUndoRedoBtns();
+}
+function applySnapshot(snap) {
+  maskDataCtx.clearRect(0,0,maskDataCvs.width,maskDataCvs.height);
+  maskDataCtx.putImageData(snap,0,0);
+  const d = snap.data;
+  maskHasContent = false;
+  for (let i=3;i<d.length;i+=4) { if (d[i]>0) { maskHasContent=true; break; } }
+  syncMaskDisplay();
+}
+function updateUndoRedoBtns() {
+  undoMaskBtn.disabled = maskHistory.length === 0;
+  redoMaskBtn.disabled = maskRedoStack.length === 0;
+}
+undoMaskBtn.addEventListener('click', () => {
+  if (!maskHistory.length) return;
+  const cur = maskDataCtx.getImageData(0,0,maskDataCvs.width,maskDataCvs.height);
+  maskRedoStack.push(cur);
+  applySnapshot(maskHistory.pop());
+  updateUndoRedoBtns();
+});
+redoMaskBtn.addEventListener('click', () => {
+  if (!maskRedoStack.length) return;
+  const cur = maskDataCtx.getImageData(0,0,maskDataCvs.width,maskDataCvs.height);
+  maskHistory.push(cur);
+  applySnapshot(maskRedoStack.pop());
+  updateUndoRedoBtns();
+});
 
-  // Step 1: draw current canvas (original image) rotated by -angle onto temp
-  const tmpCvs = document.createElement('canvas');
-  tmpCvs.width  = rotW;
-  tmpCvs.height = rotH;
-  const tmpCtx  = tmpCvs.getContext('2d');
-  tmpCtx.save();
-  tmpCtx.translate(rotW / 2, rotH / 2);
-  tmpCtx.rotate(-rad);
-  tmpCtx.drawImage(canvas, -W / 2, -H / 2);
-  tmpCtx.restore();
+// ── Brush size ────────────────────────────────────────
+function setBrush(v) {
+  currentBrush = Math.round(Math.min(120, Math.max(2, v)));
+  brushSlider.value = currentBrush;
+  brushValEl.value  = currentBrush;
+  showBrushSizePreview();
+}
+function showBrushSizePreview() {
+  const sliderRect = brushSlider.getBoundingClientRect();
+  // diameter is the brush size in display px — enforce a visible minimum
+  const diameter = Math.max(16, currentBrush);
+  const pad = 4;
+  const size = diameter + pad * 2;
+  brushSzPrev.width  = size;
+  brushSzPrev.height = size;
+  // Position: just to the right of the sidebar, vertically centred on the slider
+  brushSzFloat.style.left   = '308px';
+  brushSzFloat.style.top    = (sliderRect.top + sliderRect.height / 2 - size / 2) + 'px';
+  brushSzFloat.style.width  = size + 'px';
+  brushSzFloat.style.height = size + 'px';
+  const r = diameter / 2;
+  const cx = size / 2, cy = size / 2;
+  brushSzCtx.clearRect(0, 0, size, size);
+  brushSzCtx.beginPath(); brushSzCtx.arc(cx, cy, r, 0, Math.PI*2);
+  brushSzCtx.fillStyle = 'rgba(168,85,247,0.18)'; brushSzCtx.fill();
+  brushSzCtx.beginPath(); brushSzCtx.arc(cx, cy, r, 0, Math.PI*2);
+  brushSzCtx.strokeStyle = 'rgba(168,85,247,0.85)'; brushSzCtx.lineWidth = 1.5; brushSzCtx.stroke();
+  brushSzCtx.beginPath(); brushSzCtx.arc(cx, cy, r + 1.5, 0, Math.PI*2);
+  brushSzCtx.strokeStyle = 'rgba(255,255,255,0.35)'; brushSzCtx.lineWidth = 1; brushSzCtx.stroke();
+  brushSzFloat.classList.add('visible');
+}
+brushSlider.addEventListener('input', () => setBrush(parseInt(brushSlider.value)));
+brushSlider.addEventListener('pointerup', () => brushSzFloat.classList.remove('visible'));
+brushSlider.addEventListener('mouseleave', () => { if (!brushSlider.matches(':active')) brushSzFloat.classList.remove('visible'); });
+brushValEl.addEventListener('change', () => {
+  setBrush(parseInt(brushValEl.value)||20);
+  brushSzFloat.classList.remove('visible');
+});
+brushValEl.addEventListener('keydown', e => { if (e.key==='Enter') brushValEl.blur(); });
 
-  // Step 2: sort every row of the rotated image
-  for (let row = 0; row < rotH; row++) {
-    const id     = tmpCtx.getImageData(0, row, rotW, 1);
-    const pixels = getPixels(id.data);
-    sortSegments(pixels, threshold, invert);
-    setPixels(id.data, pixels);
-    tmpCtx.putImageData(id, 0, row);
+// ── Fade ──────────────────────────────────────────────
+function setFade(v) {
+  currentFade = Math.round(Math.min(9999, Math.max(1, v)));
+  fadeSlider.value = currentFade;
+  fadeValEl.value  = currentFade;
+}
+fadeSlider.addEventListener('input', () => setFade(parseInt(fadeSlider.value)));
+fadeValEl.addEventListener('change', () => setFade(parseInt(fadeValEl.value)||600));
+fadeValEl.addEventListener('keydown', e => { if (e.key==='Enter') fadeValEl.blur(); });
+
+function updateFadeRowVisibility() {
+  const extOn  = extendMaskEl.checked;
+  const fadeOn = fadeEnabledEl.checked;
+  fadeRow.style.opacity       = extOn ? '1' : '0.4';
+  fadeRow.style.pointerEvents = extOn ? 'all' : 'none';
+  fadeFieldRow.style.opacity       = (extOn && fadeOn) ? '1' : '0.4';
+  fadeFieldRow.style.pointerEvents = (extOn && fadeOn) ? 'all' : 'none';
+}
+extendMaskEl.addEventListener('change', updateFadeRowVisibility);
+fadeEnabledEl.addEventListener('change', updateFadeRowVisibility);
+updateFadeRowVisibility();
+
+// ── Brush cursor ──────────────────────────────────────
+function updateBrushCursor(e) {
+  if (!maskActiveMode || !loadedImg) return;
+  const diameter = currentBrush * zoomScale;
+  brushCursor.style.left   = e.clientX + 'px';
+  brushCursor.style.top    = e.clientY + 'px';
+  brushCursor.style.width  = diameter + 'px';
+  brushCursor.style.height = diameter + 'px';
+  // Red if actively right-clicking or in erase mode; purple for draw
+  const isErasing = maskTool === 'erase' || maskActiveMode === 'erase';
+  brushCursor.classList.toggle('erase', isErasing && !isPainting
+    ? maskActiveMode === 'erase'
+    : maskTool === 'erase');
+}
+
+// ── Canvas coordinate mapping ─────────────────────────
+function getCanvasPoint(e) {
+  const rect = canvasArea.getBoundingClientRect();
+  const localX = e.clientX - rect.left;
+  const localY = e.clientY - rect.top;
+  const W = rect.width, H = rect.height;
+  // Undo zoom transform (centered pan+scale)
+  const unzoomedX = (localX - W/2 - zoomPanX) / zoomScale + W/2;
+  const unzoomedY = (localY - H/2 - zoomPanY) / zoomScale + H/2;
+  // Convert to canvas-local coords (canvas is flex-centered in canvasWrap which fills canvasArea)
+  return {
+    x: unzoomedX - canvas.offsetLeft,
+    y: unzoomedY - canvas.offsetTop
+  };
+}
+
+// ── Painting ──────────────────────────────────────────
+function paintDot(pt) {
+  const scaleX = maskDataCvs.width  / maskCanvas.width;
+  const scaleY = maskDataCvs.height / maskCanvas.height;
+  const r = currentBrush * ((scaleX+scaleY)/2) / 2;
+  if (maskTool === 'draw') {
+    maskDataCtx.globalCompositeOperation = 'source-over';
+    maskDataCtx.fillStyle = 'rgba(168,85,247,1)';
+  } else {
+    maskDataCtx.globalCompositeOperation = 'destination-out';
+    maskDataCtx.fillStyle = 'rgba(0,0,0,1)';
   }
+  maskDataCtx.beginPath();
+  maskDataCtx.arc(pt.x*scaleX, pt.y*scaleY, r, 0, Math.PI*2);
+  maskDataCtx.fill();
+  maskDataCtx.globalCompositeOperation = 'source-over';
+  if (maskTool === 'draw') maskHasContent = true;
+  syncMaskDisplay();
+}
 
-  // Step 3: rotate sorted image back by +angle onto main canvas
-  // clearRect first so corner areas outside the original bounds are transparent
-  ctx.clearRect(0, 0, W, H);
-  ctx.save();
-  ctx.translate(W / 2, H / 2);
-  ctx.rotate(rad);
-  ctx.drawImage(tmpCvs, -rotW / 2, -rotH / 2);
-  ctx.restore();
+function paintStroke(from, to) {
+  if (!from) return;
+  const scaleX = maskDataCvs.width  / maskCanvas.width;
+  const scaleY = maskDataCvs.height / maskCanvas.height;
+  maskDataCtx.lineCap  = 'round';
+  maskDataCtx.lineJoin = 'round';
+  maskDataCtx.lineWidth = currentBrush * ((scaleX+scaleY)/2);
+  if (maskTool === 'draw') {
+    maskDataCtx.globalCompositeOperation = 'source-over';
+    maskDataCtx.strokeStyle = 'rgba(168,85,247,1)';
+  } else {
+    maskDataCtx.globalCompositeOperation = 'destination-out';
+    maskDataCtx.strokeStyle = 'rgba(0,0,0,1)';
+  }
+  maskDataCtx.beginPath();
+  const mx = (from.x+to.x)/2, my = (from.y+to.y)/2;
+  maskDataCtx.moveTo(from.x*scaleX, from.y*scaleY);
+  maskDataCtx.quadraticCurveTo(from.x*scaleX, from.y*scaleY, mx*scaleX, my*scaleY);
+  maskDataCtx.lineTo(to.x*scaleX, to.y*scaleY);
+  maskDataCtx.stroke();
+  maskDataCtx.globalCompositeOperation = 'source-over';
+  if (maskTool === 'draw') maskHasContent = true;
+  syncMaskDisplay();
+}
+
+// Mouse events on canvas area for painting
+canvasArea.addEventListener('mousedown', e => {
+  if (!loadedImg || !maskActiveMode) return;
+  if (e.button === 0 || e.button === 2) {
+    e.preventDefault();
+    maskTool = (e.button === 2 || maskActiveMode === 'erase') ? 'erase' : 'draw';
+    brushCursor.classList.toggle('erase', maskTool === 'erase');
+    saveSnapshot();
+    isPainting = true;
+    const pt = getCanvasPoint(e);
+    lastPt = pt;
+    // Paint a dot immediately on click (so single clicks register)
+    paintDot(pt);
+  }
+});
+canvasArea.addEventListener('contextmenu', e => {
+  if (maskActiveMode) e.preventDefault();
+});
+
+// ══════════════════════════════════════════════════════
+//  BLUR + ALPHA MAP + MASKED SORT (from app)
+// ══════════════════════════════════════════════════════
+function blurAlpha(alpha, W, H, radius) {
+  if (radius < 1) return alpha;
+  const tmp = new Float32Array(W*H);
+  for (let y=0;y<H;y++) {
+    for (let x=0;x<W;x++) {
+      let s=0,n=0;
+      for (let dx=-radius;dx<=radius;dx++) {
+        const nx=x+dx;
+        if (nx>=0&&nx<W) { s+=alpha[y*W+nx]; n++; }
+      }
+      tmp[y*W+x]=s/n;
+    }
+  }
+  const out = new Float32Array(W*H);
+  for (let y=0;y<H;y++) {
+    for (let x=0;x<W;x++) {
+      let s=0,n=0;
+      for (let dy=-radius;dy<=radius;dy++) {
+        const ny=y+dy;
+        if (ny>=0&&ny<H) { s+=tmp[ny*W+x]; n++; }
+      }
+      out[y*W+x]=s/n;
+    }
+  }
+  return out;
+}
+
+function buildAlphaMap(W, H, angleDeg) {
+  const deg  = ((angleDeg%360)+360)%360;
+  const rad  = deg*Math.PI/180;
+  const fade = (extendMaskEl.checked && fadeEnabledEl.checked) ? currentFade : 0;
+  const mData = maskDataCtx.getImageData(0,0,W,H).data;
+  const baseMask = new Float32Array(W*H);
+  for (let i=0;i<W*H;i++) baseMask[i]=mData[i*4+3]/255;
+  if (!extendMaskEl.checked) return blurAlpha(baseMask,W,H,4);
+
+  const aC=Math.abs(Math.cos(rad)), aS=Math.abs(Math.sin(rad));
+  const rW=Math.ceil(W*aC+H*aS), rH=Math.ceil(W*aS+H*aC);
+  const srcCvs=document.createElement('canvas');
+  srcCvs.width=W; srcCvs.height=H;
+  const srcCtx=srcCvs.getContext('2d');
+  srcCtx.drawImage(maskDataCvs,0,0);
+  const rotCvs=document.createElement('canvas');
+  rotCvs.width=rW; rotCvs.height=rH;
+  const rotCtx=rotCvs.getContext('2d');
+  rotCtx.save(); rotCtx.translate(rW/2,rH/2); rotCtx.rotate(-rad);
+  rotCtx.drawImage(srcCvs,-W/2,-H/2); rotCtx.restore();
+  const rotId=rotCtx.getImageData(0,0,rW,rH), rd=rotId.data;
+  for (let row=0;row<rH;row++) {
+    let last=-1;
+    for (let col=0;col<rW;col++) { if (rd[(row*rW+col)*4+3]>5) last=col; }
+    if (last<0) continue;
+    for (let col=last+1;col<rW;col++) {
+      const a=fade===0?1:Math.max(0,1-(col-last)/fade);
+      const p=(row*rW+col)*4;
+      const existing=rd[p+3]/255;
+      const merged=Math.max(existing,a);
+      rd[p]=168; rd[p+1]=85; rd[p+2]=247; rd[p+3]=Math.round(merged*255);
+    }
+  }
+  rotCtx.putImageData(rotId,0,0);
+  const outCvs=document.createElement('canvas');
+  outCvs.width=W; outCvs.height=H;
+  const outCtx=outCvs.getContext('2d');
+  outCtx.save(); outCtx.translate(W/2,H/2); outCtx.rotate(rad);
+  outCtx.drawImage(rotCvs,-rW/2,-rH/2); outCtx.restore();
+  const outId=outCtx.getImageData(0,0,W,H);
+  const alpha=new Float32Array(W*H);
+  for (let i=0;i<W*H;i++) alpha[i]=outId.data[i*4+3]/255;
+  return blurAlpha(alpha,W,H,4);
+}
+
+function sortWithMask(t, inv, angleDeg) {
+  const origId   = ctx.getImageData(0,0,canvas.width,canvas.height);
+  const origData = new Uint8ClampedArray(origId.data);
+  const W=canvas.width, H=canvas.height;
+  const amap = buildAlphaMap(W,H,angleDeg);
+  pixelSortAngle(t,inv,angleDeg);
+  const sortedId   = ctx.getImageData(0,0,canvas.width,canvas.height);
+  const sortedData = sortedId.data;
+  for (let i=0;i<W*H;i++) {
+    const a=amap[i], p=i*4;
+    sortedData[p]   = origData[p]  *(1-a)+sortedData[p]  *a;
+    sortedData[p+1] = origData[p+1]*(1-a)+sortedData[p+1]*a;
+    sortedData[p+2] = origData[p+2]*(1-a)+sortedData[p+2]*a;
+    sortedData[p+3] = origData[p+3];
+  }
+  ctx.putImageData(sortedId,0,0);
 }
 </script>
 </body>
