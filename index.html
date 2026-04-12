@@ -595,6 +595,14 @@
         <input type="range" id="threshold" min="0" max="255" value="80">
         <div class="size-note" style="margin-top:4px;">Pixels below this brightness break sort runs</div>
       </div>
+      <div class="toggle-row" style="margin-top:10px;">
+        <span class="toggle-label">Invert threshold</span>
+        <label class="toggle">
+          <input type="checkbox" id="invertThreshold">
+          <span class="toggle-track"></span>
+        </label>
+      </div>
+      <div class="size-note" style="margin-top:4px;">Off: sort bright areas. On: Sort dark areas.</div>
     </div>
 
     <!-- MASK SECTION -->
@@ -804,7 +812,8 @@ const thresholdVal = document.getElementById('thresholdVal');
 const angleVal     = document.getElementById('angleVal');
 const wheelCanvas  = document.getElementById('angleWheel');
 const wheelContainer = document.getElementById('angleWheelContainer');
-const invertEl     = document.getElementById('invert');
+const invertEl          = document.getElementById('invert');
+const invertThreshEl    = document.getElementById('invertThreshold');
 const anglePerfNote= document.getElementById('anglePerfNote');
 const drawToolBtn  = document.getElementById('drawToolBtn');
 const eraseToolBtn = document.getElementById('eraseToolBtn');
@@ -1194,9 +1203,10 @@ function sort() {
   if (!loadedImg) return;
   if (maskActiveMode) setMaskActiveMode(maskActiveMode); // toggles off without clearing mask
   ctx.drawImage(loadedImg, 0, 0);
-  const threshold = parseInt(thresholdEl.value);
-  const angle     = Math.round(currentAngle);
-  const invert    = invertEl.checked;
+  const threshold    = parseInt(thresholdEl.value);
+  const angle        = Math.round(currentAngle);
+  const invert       = invertEl.checked;
+  const invertThresh = invertThreshEl.checked;
 
   setStatus('working', 'Sorting…');
   processBtn.disabled = true;
@@ -1204,9 +1214,9 @@ function sort() {
 
   setTimeout(() => {
     if (maskHasContent) {
-      sortWithMask(threshold, invert, angle);
+      sortWithMask(threshold, invert, angle, invertThresh);
     } else {
-      pixelSortAngle(threshold, invert, angle);
+      pixelSortAngle(threshold, invert, angle, invertThresh);
     }
     const w = canvas.width, h = canvas.height;
     setStatus('ready', `${w}×${h} — sorted (${angle}°, t=${threshold})`);
@@ -1237,32 +1247,38 @@ function findValueLess(pixels,val,start) {
     if ((pixels[i].r+pixels[i].g+pixels[i].b)/3<val) return i;
   return pixels.length;
 }
-function sortSegments(pixels,threshold,invert) {
-  const cmp = invert?meanSortInv:meanSort;
-  let s=0, e=findValueLess(pixels,threshold,s);
+function findValueGreater(pixels,val,start) {
+  for (let i=start;i<pixels.length;i++)
+    if ((pixels[i].r+pixels[i].g+pixels[i].b)/3>=val) return i;
+  return pixels.length;
+}
+function sortSegments(pixels,threshold,invert,invertThresh) {
+  const cmp    = invert ? meanSortInv : meanSort;
+  const finder = invertThresh ? findValueGreater : findValueLess;
+  let s=0, e=finder(pixels,threshold,s);
   while (s<pixels.length) {
     const r=pixels.splice(s,e-s); r.sort(cmp); pixels.splice(s,0,...r);
-    s=e; e=findValueLess(pixels,threshold,s+1);
+    s=e; e=finder(pixels,threshold,s+1);
   }
 }
-function pixelSortH(t,inv) {
+function pixelSortH(t,inv,invertThresh) {
   for (let row=0;row<canvas.height;row++) {
     const id=ctx.getImageData(0,row,canvas.width,1);
-    const px=getPixels(id.data); sortSegments(px,t,inv);
+    const px=getPixels(id.data); sortSegments(px,t,inv,invertThresh);
     setPixels(id.data,px); ctx.putImageData(id,0,row);
   }
 }
-function pixelSortV(t,inv) {
+function pixelSortV(t,inv,invertThresh) {
   for (let col=0;col<canvas.width;col++) {
     const id=ctx.getImageData(col,0,1,canvas.height);
-    const px=getPixels(id.data); sortSegments(px,t,inv);
+    const px=getPixels(id.data); sortSegments(px,t,inv,invertThresh);
     setPixels(id.data,px); ctx.putImageData(id,col,0);
   }
 }
-function pixelSortAngle(t,inv,angleDeg) {
+function pixelSortAngle(t,inv,angleDeg,invertThresh) {
   const deg=((angleDeg%360)+360)%360;
-  if (deg===0||deg===180) return pixelSortH(t,inv);
-  if (deg===90||deg===270) return pixelSortV(t,inv);
+  if (deg===0||deg===180) return pixelSortH(t,inv,invertThresh);
+  if (deg===90||deg===270) return pixelSortV(t,inv,invertThresh);
   const W=canvas.width, H=canvas.height;
   const rad=deg*Math.PI/180;
   const aC=Math.abs(Math.cos(rad)), aS=Math.abs(Math.sin(rad));
@@ -1274,7 +1290,7 @@ function pixelSortAngle(t,inv,angleDeg) {
   tc.drawImage(canvas,-W/2,-H/2); tc.restore();
   for (let row=0;row<rH;row++) {
     const id=tc.getImageData(0,row,rW,1);
-    const px=getPixels(id.data); sortSegments(px,t,inv);
+    const px=getPixels(id.data); sortSegments(px,t,inv,invertThresh);
     setPixels(id.data,px); tc.putImageData(id,0,row);
   }
   ctx.clearRect(0,0,W,H);
@@ -1627,12 +1643,12 @@ function buildAlphaMap(W, H, angleDeg) {
   return blurAlpha(alpha,W,H,4);
 }
 
-function sortWithMask(t, inv, angleDeg) {
+function sortWithMask(t, inv, angleDeg, invertThresh) {
   const origId   = ctx.getImageData(0,0,canvas.width,canvas.height);
   const origData = new Uint8ClampedArray(origId.data);
   const W=canvas.width, H=canvas.height;
   const amap = buildAlphaMap(W,H,angleDeg);
-  pixelSortAngle(t,inv,angleDeg);
+  pixelSortAngle(t,inv,angleDeg,invertThresh);
   const sortedId   = ctx.getImageData(0,0,canvas.width,canvas.height);
   const sortedData = sortedId.data;
   for (let i=0;i<W*H;i++) {
