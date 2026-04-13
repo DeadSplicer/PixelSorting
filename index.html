@@ -650,6 +650,14 @@
         </button>
       </div>
 
+      <div class="toggle-row">
+        <span class="toggle-label">Invert mask</span>
+        <label class="toggle">
+          <input type="checkbox" id="invertMask">
+          <span class="toggle-track"></span>
+        </label>
+      </div>
+
       <div class="field">
         <div class="field-label">
           <span>Brush size</span>
@@ -825,7 +833,8 @@ const brushValEl   = document.getElementById('brushVal');
 const extendMaskEl = document.getElementById('extendMask');
 const fadeRow      = document.getElementById('fadeRow');
 const fadeFieldRow = document.getElementById('fadeFieldRow');
-const fadeEnabledEl= document.getElementById('fadeEnabled');
+const fadeEnabledEl    = document.getElementById('fadeEnabled');
+const invertMaskEl     = document.getElementById('invertMask');
 const fadeSlider   = document.getElementById('fadeSlider');
 const fadeValEl    = document.getElementById('fadeVal');
 
@@ -1213,7 +1222,7 @@ function sort() {
   processBtn.innerHTML = '<span class="spinner"></span> Sorting…';
 
   setTimeout(() => {
-    if (maskHasContent) {
+    if (maskHasContent || invertMaskEl.checked) {
       sortWithMask(threshold, invert, angle, invertThresh);
     } else {
       pixelSortAngle(threshold, invert, angle, invertThresh);
@@ -1605,7 +1614,11 @@ function buildAlphaMap(W, H, angleDeg) {
   const mData = maskDataCtx.getImageData(0,0,W,H).data;
   const baseMask = new Float32Array(W*H);
   for (let i=0;i<W*H;i++) baseMask[i]=mData[i*4+3]/255;
-  if (!extendMaskEl.checked) return blurAlpha(baseMask,W,H,4);
+  if (!extendMaskEl.checked) {
+    const blurred = blurAlpha(baseMask,W,H,4);
+    if (invertMaskEl.checked) for (let i=0;i<W*H;i++) blurred[i]=1-blurred[i];
+    return blurred;
+  }
 
   const aC=Math.abs(Math.cos(rad)), aS=Math.abs(Math.sin(rad));
   const rW=Math.ceil(W*aC+H*aS), rH=Math.ceil(W*aS+H*aC);
@@ -1640,7 +1653,9 @@ function buildAlphaMap(W, H, angleDeg) {
   const outId=outCtx.getImageData(0,0,W,H);
   const alpha=new Float32Array(W*H);
   for (let i=0;i<W*H;i++) alpha[i]=outId.data[i*4+3]/255;
-  return blurAlpha(alpha,W,H,4);
+  const blurred = blurAlpha(alpha,W,H,4);
+  if (invertMaskEl.checked) for (let i=0;i<W*H;i++) blurred[i]=1-blurred[i];
+  return blurred;
 }
 
 function sortWithMask(t, inv, angleDeg, invertThresh) {
